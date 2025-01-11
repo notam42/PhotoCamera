@@ -37,9 +37,6 @@ actor CaptureService {
     /// A Boolean value that indicates whether the actor finished its required configuration.
     private var isSetUp = false
 
-    /// A map that stores capture controls by device identifier.
-    private var controlsMap: [String: [AVCaptureControl]] = [:]
-    
     /// A serial dispatch queue to use for capture control actions.
     private let sessionQueue = DispatchSerialQueue(label: "com.melikyan.CameraView")
     
@@ -100,8 +97,6 @@ actor CaptureService {
             // Add the photo capture output as the default output type.
             try addOutput(output)
 
-            // Configure controls to use with the Camera Control.
-            configureControls(for: defaultCamera)
             // Configure a rotation coordinator for the default video device.
             createRotationCoordinator(for: defaultCamera)
             // Observe changes to the default camera's subject area.
@@ -143,69 +138,7 @@ actor CaptureService {
         }
         return device
     }
-    
-    // MARK: - Capture controls
-    
-    private func configureControls(for device: AVCaptureDevice) {
-        
-        // Exit early if the host device doesn't support capture controls.
-        guard captureSession.supportsControls else { return }
-        
-        // Begin configuring the capture session.
-        captureSession.beginConfiguration()
-        
-        // Remove previously configured controls, if any.
-        for control in captureSession.controls {
-            captureSession.removeControl(control)
-        }
-        
-        // Create controls and add them to the capture session.
-        for control in createControls(for: device) {
-            if captureSession.canAddControl(control) {
-                captureSession.addControl(control)
-            } else {
-                logger.info("Unable to add control \(control).")
-            }
-        }
-        
-        // Commit the capture session configuration.
-        captureSession.commitConfiguration()
-    }
-    
-    func createControls(for device: AVCaptureDevice) -> [AVCaptureControl] {
-        // Retrieve the capture controls for this device, if they exist.
-        guard let controls = controlsMap[device.uniqueID] else {
-            // Define the default controls.
-            var controls = [
-                AVCaptureSystemZoomSlider(device: device),
-                AVCaptureSystemExposureBiasSlider(device: device)
-            ]
-            // Create a lens position control if the device supports setting a custom position.
-            if device.isLockingFocusWithCustomLensPositionSupported {
-                // Create a slider to adjust the value from 0 to 1.
-                let lensSlider = AVCaptureSlider("Lens Position", symbolName: "circle.dotted.circle", in: 0...1)
-                // Perform the slider's action on the session queue.
-                lensSlider.setActionQueue(sessionQueue) { lensPosition in
-                    do {
-                        try device.lockForConfiguration()
-                        device.setFocusModeLocked(lensPosition: lensPosition)
-                        device.unlockForConfiguration()
-                    } catch {
-                        logger.info("Unable to change the lens position: \(error)")
-                    }
-                }
-                // Add the slider the controls array.
-                controls.append(lensSlider)
-            }
-            // Store the controls for future use.
-            controlsMap[device.uniqueID] = controls
-            return controls
-        }
-        
-        // Return the previously created controls.
-        return controls
-    }
-    
+
     // MARK: - Device selection
     
     /// Changes the capture device that provides video input.
@@ -249,8 +182,6 @@ actor CaptureService {
         do {
             // Attempt to connect a new input and device to the capture session.
             activeVideoInput = try addInput(for: device)
-            // Configure capture controls for new device selection.
-            configureControls(for: device)
             // Configure a new rotation coordinator for the new device.
             createRotationCoordinator(for: device)
             // Register for device observations.
