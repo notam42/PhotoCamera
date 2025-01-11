@@ -19,8 +19,6 @@ enum CameraStatus {
     case failed
     /// A status that indicates the camera is successfully running.
     case running
-    /// A status that indicates higher-priority media processing is interrupting the camera.
-    case interrupted
 }
 
 /// An enumeration that defines the activity states the capture service supports.

@@ -14,8 +14,6 @@ actor CaptureService {
     
     /// A value that indicates whether the capture service is idle or capturing a photo or movie.
     @Published private(set) var captureActivity: CaptureActivity = .idle
-    /// A Boolean value that indicates whether a higher priority event, like receiving a phone call, interrupts the app.
-    @Published private(set) var isInterrupted = false
 
     /// A type that connects a preview destination with the capture session.
     nonisolated let previewSource: PreviewSource
@@ -418,22 +416,6 @@ actor CaptureService {
 
     /// Observe capture-related notifications.
     private func observeNotifications() {
-        Task {
-            for await reason in NotificationCenter.default.notifications(named: AVCaptureSession.wasInterruptedNotification)
-                .compactMap({ $0.userInfo?[AVCaptureSessionInterruptionReasonKey] as AnyObject? })
-                .compactMap({ AVCaptureSession.InterruptionReason(rawValue: $0.integerValue) }) {
-                /// Set the `isInterrupted` state as appropriate.
-                isInterrupted = [.audioDeviceInUseByAnotherClient, .videoDeviceInUseByAnotherClient].contains(reason)
-            }
-        }
-        
-        Task {
-            // Await notification of the end of an interruption.
-            for await _ in NotificationCenter.default.notifications(named: AVCaptureSession.interruptionEndedNotification) {
-                isInterrupted = false
-            }
-        }
-        
         Task {
             for await error in NotificationCenter.default.notifications(named: AVCaptureSession.runtimeErrorNotification)
                 .compactMap({ $0.userInfo?[AVCaptureSessionErrorKey] as? AVError }) {

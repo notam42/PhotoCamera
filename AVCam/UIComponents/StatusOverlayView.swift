@@ -13,7 +13,7 @@ struct StatusOverlayView: View {
 	let status: CameraStatus
 
 	var body: some View {
-		if [.unauthorized, .failed, .interrupted].contains(status) {
+		if [.unauthorized, .failed].contains(status) {
 			// Dimming view.
 			Rectangle()
 				.fill(Color(white: 0.0, opacity: 0.5))
@@ -35,8 +35,6 @@ struct StatusOverlayView: View {
 			return .red
 		case .failed:
 			return .orange
-		case .interrupted:
-			return .yellow
 		default:
 			return .clear
 		}
@@ -46,18 +44,12 @@ struct StatusOverlayView: View {
 		switch status {
 		case .unauthorized:
 			return "You haven't authorized the app to use the camera. Change these settings in Settings → Privacy & Security"
-		case .interrupted:
-			return "The camera was interrupted by higher-priority media processing."
 		case .failed:
 			return "The camera failed to start. Please try relaunching the app."
 		default:
 			return ""
 		}
 	}
-}
-
-#Preview("Interrupted") {
-    CameraView(camera: Camera(status: .interrupted))
 }
 
 #Preview("Failed") {
