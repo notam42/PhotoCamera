@@ -33,7 +33,6 @@ struct CameraUI<CameraModel: Camera>: PlatformView {
     @ViewBuilder
     var compactUI: some View {
         VStack(spacing: 0) {
-            FeaturesToolbar(camera: camera)
             Spacer()
             MainToolbar(camera: camera)
                 .padding(.bottom, bottomPadding)
@@ -45,16 +44,11 @@ struct CameraUI<CameraModel: Camera>: PlatformView {
     var regularUI: some View {
         VStack {
             Spacer()
-            ZStack {
-                MainToolbar(camera: camera)
-                FeaturesToolbar(camera: camera)
-                    .frame(width: 250)
-                    .offset(x: 250) // The vertical offset from center.
-            }
-            .frame(width: 740)
-            .background(.ultraThinMaterial.opacity(0.8))
-            .cornerRadius(12)
-            .padding(.bottom, 32)
+            MainToolbar(camera: camera)
+                .frame(width: 740)
+                .background(.ultraThinMaterial.opacity(0.8))
+                .cornerRadius(12)
+                .padding(.bottom, 32)
         }
     }
 

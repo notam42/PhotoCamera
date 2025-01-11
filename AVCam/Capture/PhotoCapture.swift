@@ -27,12 +27,12 @@ final class PhotoCapture: OutputService {
     // MARK: - Capture a photo.
     
     /// The app calls this method when the user taps the photo capture button.
-    func capturePhoto(with features: PhotoFeatures) async throws -> Photo {
+    func capturePhoto() async throws -> Photo {
         // Wrap the delegate-based capture API in a continuation to use it in an async context.
         try await withCheckedThrowingContinuation { continuation in
             
             // Create a settings object to configure the photo capture.
-            let photoSettings = createPhotoSettings(with: features)
+            let photoSettings = createPhotoSettings()
             
             let delegate = PhotoCaptureDelegate(continuation: continuation)
             monitorProgress(of: delegate)
@@ -45,7 +45,7 @@ final class PhotoCapture: OutputService {
     // MARK: - Create a photo settings object.
     
     // Create a photo settings object with the features a person enables in the UI.
-    private func createPhotoSettings(with features: PhotoFeatures) -> AVCapturePhotoSettings {
+    private func createPhotoSettings() -> AVCapturePhotoSettings {
         // Create a new settings object to configure the photo capture.
         var photoSettings = AVCapturePhotoSettings()
         
@@ -64,12 +64,7 @@ final class PhotoCapture: OutputService {
         /// `CaptureService` automatically updates the photo output's `maxPhotoDimensions`
         /// when the capture pipeline changes.
         photoSettings.maxPhotoDimensions = photoOutput.maxPhotoDimensions
-        
-        // Set the priority of speed versus quality during this capture.
-        if let prioritization = AVCapturePhotoOutput.QualityPrioritization(rawValue: features.qualityPrioritization.rawValue) {
-            photoSettings.photoQualityPrioritization = prioritization
-        }
-        
+
         return photoSettings
     }
     
@@ -95,7 +90,7 @@ final class PhotoCapture: OutputService {
     ///
     func updateConfiguration(for device: AVCaptureDevice) {
         // Enable all supported features.
-        photoOutput.maxPhotoDimensions = device.activeFormat.supportedMaxPhotoDimensions.last ?? .zero
+        photoOutput.maxPhotoDimensions = device.activeFormat.supportedMaxPhotoDimensions.last ?? CMVideoDimensions()
         photoOutput.isLivePhotoCaptureEnabled = photoOutput.isLivePhotoCaptureSupported
         photoOutput.maxPhotoQualityPrioritization = .quality
         photoOutput.isResponsiveCaptureEnabled = photoOutput.isResponsiveCaptureSupported

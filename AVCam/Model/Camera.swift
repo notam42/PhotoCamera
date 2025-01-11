@@ -41,9 +41,6 @@ protocol Camera: AnyObject {
     /// Performs a one-time automatic focus and exposure operation.
     func focusAndExpose(at point: CGPoint) async
     
-    /// A value that indicates how to balance the photo capture quality versus speed.
-    var qualityPrioritization: QualityPrioritization { get set }
-    
     /// Captures a photo and writes it to the user's photo library.
     func capturePhoto() async
     
@@ -55,7 +52,4 @@ protocol Camera: AnyObject {
     
     /// An error if the camera encountered a problem.
     var error: Error? { get }
-    
-    /// Synchronize the state of the camera with the persisted values.
-    func syncState() async
 }

@@ -51,10 +51,7 @@ final class CameraModel: Camera {
     
     /// An object that manages the app's capture functionality.
     private let captureService = CaptureService()
-    
-    /// Persistent state shared between the app and capture extension.
-    private var cameraState = CameraState()
-    
+
     init() {
         //
     }
@@ -68,24 +65,14 @@ final class CameraModel: Camera {
             return
         }
         do {
-            // Synchronize the state of the model with the persistent state.
-            await syncState()
             // Start the capture service to start the flow of data.
-            try await captureService.start(with: cameraState)
+            try await captureService.start()
             observeState()
             status = .running
         } catch {
             logger.error("Failed to start capture service. \(error)")
             status = .failed
         }
-    }
-    
-    /// Synchronizes the persistent camera state.
-    ///
-    /// `CameraState` represents the persistent state, such as the capture mode, that the app and extension share.
-    func syncState() async {
-        cameraState = await CameraState.current
-        qualityPrioritization = cameraState.qualityPrioritization
     }
     
     // MARK: - Changing devices
@@ -102,22 +89,13 @@ final class CameraModel: Camera {
     /// Captures a photo and writes it to the user's Photos library.
     func capturePhoto() async {
         do {
-            let photoFeatures = PhotoFeatures(qualityPrioritization: qualityPrioritization)
-            let photo = try await captureService.capturePhoto(with: photoFeatures)
+            let photo = try await captureService.capturePhoto()
             try await mediaLibrary.save(photo: photo)
         } catch {
             self.error = error
         }
     }
-    
-    /// A value that indicates how to balance the photo capture quality versus speed.
-    var qualityPrioritization = QualityPrioritization.quality {
-        didSet {
-            // Update the persistent state value.
-            cameraState.qualityPrioritization = qualityPrioritization
-        }
-    }
-    
+
     /// Performs a focus and expose operation at the specified screen point.
     func focusAndExpose(at point: CGPoint) async {
         await captureService.focusAndExpose(at: point)

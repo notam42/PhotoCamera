@@ -80,7 +80,7 @@ actor CaptureService {
     }
     
     // MARK: - Capture session life cycle
-    func start(with state: CameraState) async throws {
+    func start() async throws {
         // Exit early if not authorized or the session is already running.
         guard await isAuthorized, !captureSession.isRunning else { return }
         // Configure the session and start it.
@@ -407,8 +407,8 @@ actor CaptureService {
     }
     
     // MARK: - Photo capture
-    func capturePhoto(with features: PhotoFeatures) async throws -> Photo {
-        try await photoCapture.capturePhoto(with: features)
+    func capturePhoto() async throws -> Photo {
+        try await photoCapture.capturePhoto()
     }
 
     // MARK: - Internal state management

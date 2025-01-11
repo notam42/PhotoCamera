@@ -12,7 +12,6 @@ import SwiftUI
 class PreviewCameraModel: Camera {
     
     var prefersMinimizedUI = false
-    var qualityPrioritization = QualityPrioritization.quality
     var shouldFlashScreen = false
     
     struct PreviewSourceStub: PreviewSource {
@@ -48,18 +47,8 @@ class PreviewCameraModel: Camera {
     func capturePhoto() {
         logger.debug("Photo capture isn't implemented in PreviewCamera.")
     }
-    
-    func toggleRecording() {
-        logger.debug("Moving capture isn't implemented in PreviewCamera.")
-    }
-    
+
     func focusAndExpose(at point: CGPoint) {
         logger.debug("Focus and expose isn't implemented in PreviewCamera.")
-    }
-    
-    var recordingTime: TimeInterval { .zero }
-    
-    func syncState() async {
-        logger.debug("Syncing state isn't implemented in PreviewCamera.")
     }
 }
