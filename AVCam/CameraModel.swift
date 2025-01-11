@@ -6,7 +6,7 @@ An object that provides the interface to the features of the camera.
 */
 
 import SwiftUI
-import Combine
+@preconcurrency import Combine
 
 /// An object that provides the interface to the features of the camera.
 ///
