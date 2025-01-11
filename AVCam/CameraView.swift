@@ -10,7 +10,7 @@ import AVFoundation
 import AVKit
 
 @MainActor
-struct CameraView<CameraModel: Camera>: PlatformView {
+struct CameraView: PlatformView {
     
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -48,5 +48,5 @@ struct CameraView<CameraModel: Camera>: PlatformView {
 }
 
 #Preview {
-    CameraView(camera: PreviewCameraModel())
+    CameraView(camera: CameraModel())
 }

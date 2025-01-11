@@ -9,7 +9,7 @@ import SwiftUI
 import PhotosUI
 
 /// A view that displays controls to capture, switch cameras, and view the last captured media item.
-struct MainToolbar<CameraModel: Camera>: PlatformView {
+struct MainToolbar: PlatformView {
 
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -40,6 +40,6 @@ struct MainToolbar<CameraModel: Camera>: PlatformView {
 
 #Preview {
     Group {
-        MainToolbar(camera: PreviewCameraModel())
+        MainToolbar(camera: CameraModel())
     }
 }

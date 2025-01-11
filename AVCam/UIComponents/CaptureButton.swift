@@ -9,7 +9,7 @@ import SwiftUI
 
 /// A view that displays an appropriate capture button for the selected mode.
 @MainActor
-struct CaptureButton<CameraModel: Camera>: View {
+struct CaptureButton: View {
     
     @State var camera: CameraModel
 
@@ -32,7 +32,7 @@ struct CaptureButton<CameraModel: Camera>: View {
 }
 
 #Preview("Photo") {
-    CaptureButton(camera: PreviewCameraModel())
+    CaptureButton(camera: CameraModel())
 }
 
 private struct PhotoCaptureButton: View {

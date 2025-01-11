@@ -18,7 +18,7 @@ let movieAspectRatio = AspectRatio(width: 9.0, height: 16.0)
 /// On a compact device size, the app also uses this view to offset the vertical position
 /// of the camera preview to better fit the UI when in photo capture mode.
 @MainActor
-struct PreviewContainer<Content: View, CameraModel: Camera>: View {
+struct PreviewContainer<Content: View>: View {
     
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     

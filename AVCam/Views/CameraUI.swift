@@ -9,7 +9,7 @@ import SwiftUI
 import AVFoundation
 
 /// A view that presents the main camera user interface.
-struct CameraUI<CameraModel: Camera>: PlatformView {
+struct CameraUI: PlatformView {
 
     @State var camera: CameraModel
 
@@ -61,5 +61,5 @@ struct CameraUI<CameraModel: Camera>: PlatformView {
 }
 
 #Preview {
-    CameraUI(camera: PreviewCameraModel())
+    CameraUI(camera: CameraModel())
 }

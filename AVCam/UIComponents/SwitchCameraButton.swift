@@ -8,7 +8,7 @@ A view that displays a button to switch between available cameras.
 import SwiftUI
 
 /// A view that displays a button to switch between available cameras.
-struct SwitchCameraButton<CameraModel: Camera>: View {
+struct SwitchCameraButton: View {
     
     @State var camera: CameraModel
     

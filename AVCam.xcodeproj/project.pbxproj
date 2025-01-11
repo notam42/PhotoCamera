@@ -16,7 +16,6 @@
 		C48091852BD584AD00753C4A /* CameraModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48091832BD584AD00753C4A /* CameraModel.swift */; };
 		C4A349DF28BD4B700056FAAF /* SwitchCameraButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A349DE28BD4B700056FAAF /* SwitchCameraButton.swift */; };
 		C4CB95D02BF06EA6000CF8C7 /* CameraUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4CB95CF2BF06EA6000CF8C7 /* CameraUI.swift */; };
-		C4DCF51428947AFA00805EE2 /* PreviewCameraModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DCF51328947AFA00805EE2 /* PreviewCameraModel.swift */; };
 		C4DFD84428C3E173005B74F0 /* DataTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DFD84328C3E173005B74F0 /* DataTypes.swift */; };
 		C4DFD84628C3ED3D005B74F0 /* StatusOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DFD84528C3ED3D005B74F0 /* StatusOverlayView.swift */; };
 		C4E15AAF2898620E00827683 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E15AAE2898620E00827683 /* CameraView.swift */; };
@@ -24,7 +23,6 @@
 		C4F82C9D285ADDA2005D427A /* AVCamApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F82C9C285ADDA2005D427A /* AVCamApp.swift */; };
 		C4F82CA1285ADDA3005D427A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4F82CA0285ADDA3005D427A /* Assets.xcassets */; };
 		C4F82CA5285ADDA3005D427A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4F82CA4285ADDA3005D427A /* Preview Assets.xcassets */; };
-		C4F82CCA285AE13B005D427A /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F82CC9285AE13B005D427A /* Camera.swift */; };
 		C4F82CCC285AE206005D427A /* CaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F82CCB285AE206005D427A /* CaptureService.swift */; };
 		C4F82CCE285AE233005D427A /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F82CCD285AE233005D427A /* CameraPreview.swift */; };
 /* End PBXBuildFile section */
@@ -65,7 +63,6 @@
 		C4A349DE28BD4B700056FAAF /* SwitchCameraButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchCameraButton.swift; sourceTree = "<group>"; };
 		C4C6E1FE2CA1CF250081A8EA /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		C4CB95CF2BF06EA6000CF8C7 /* CameraUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraUI.swift; sourceTree = "<group>"; usesTabs = 0; };
-		C4DCF51328947AFA00805EE2 /* PreviewCameraModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewCameraModel.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4DFD84328C3E173005B74F0 /* DataTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataTypes.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4DFD84528C3ED3D005B74F0 /* StatusOverlayView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusOverlayView.swift; sourceTree = "<group>"; };
 		C4E15AAE2898620E00827683 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; usesTabs = 0; };
@@ -74,7 +71,6 @@
 		C4F82C9C285ADDA2005D427A /* AVCamApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVCamApp.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4F82CA0285ADDA3005D427A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C4F82CA4285ADDA3005D427A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		C4F82CC9285AE13B005D427A /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4F82CCB285AE206005D427A /* CaptureService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaptureService.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4F82CCD285AE233005D427A /* CameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; usesTabs = 0; };
 /* End PBXFileReference section */
@@ -114,7 +110,6 @@
 		C470F0EF2899E2FB004D4515 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				C4F82CC9285AE13B005D427A /* Camera.swift */,
 				C4DFD84328C3E173005B74F0 /* DataTypes.swift */,
 			);
 			path = Model;
@@ -188,7 +183,6 @@
 			isa = PBXGroup;
 			children = (
 				C4F82CA4285ADDA3005D427A /* Preview Assets.xcassets */,
-				C4DCF51328947AFA00805EE2 /* PreviewCameraModel.swift */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -277,10 +271,8 @@
 			files = (
 				C4A349DF28BD4B700056FAAF /* SwitchCameraButton.swift in Sources */,
 				C44DC7BE289AC3DD0099BB87 /* PreviewContainer.swift in Sources */,
-				C4DCF51428947AFA00805EE2 /* PreviewCameraModel.swift in Sources */,
 				C48091852BD584AD00753C4A /* CameraModel.swift in Sources */,
 				C4F82CCE285AE233005D427A /* CameraPreview.swift in Sources */,
-				C4F82CCA285AE13B005D427A /* Camera.swift in Sources */,
 				C4E15AB12898660900827683 /* PhotoCapture.swift in Sources */,
 				C4F82CCC285AE206005D427A /* CaptureService.swift in Sources */,
 				C4F82C9D285ADDA2005D427A /* AVCamApp.swift in Sources */,

@@ -11,7 +11,7 @@ import PhotosUI
 /// A view that displays a thumbnail of the last captured media.
 ///
 /// Tapping the view opens the Photos picker.
-struct ThumbnailButton<CameraModel: Camera>: View {
+struct ThumbnailButton: View {
     
 	@State var camera: CameraModel
     

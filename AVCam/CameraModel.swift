@@ -13,10 +13,9 @@ import SwiftUI
 /// to configure the camera hardware and capture media. `CameraModel` doesn't perform capture itself, but is an
 /// `@Observable` type that mediates interactions between the app's SwiftUI views and `CaptureService`.
 ///
-/// For SwiftUI previews and Simulator, the app uses `PreviewCameraModel` instead.
-///
 @Observable
-final class CameraModel: Camera {
+@MainActor
+final class CameraModel {
     
     /// The current status of the camera, such as unauthorized, running, or failed.
     private(set) var status = CameraStatus.unknown
@@ -48,13 +47,18 @@ final class CameraModel: Camera {
     /// An object that manages the app's capture functionality.
     private let captureService = CaptureService()
 
-    init() {
-        //
+    init(status: CameraStatus = .unknown) {
+        self.status = status
     }
-    
+
     // MARK: - Starting the camera
     /// Start the camera and begin the stream of data.
     func start() async {
+        guard !Self.isPreview else {
+            status = .running
+            return
+        }
+
         // Verify that the person authorizes the app to use device cameras and microphones.
         guard await captureService.isAuthorized else {
             status = .unauthorized
@@ -75,6 +79,7 @@ final class CameraModel: Camera {
 
     /// Selects the next available video device for capture.
     func switchVideoDevices() async {
+        guard !Self.isPreview else { return }
         isSwitchingVideoDevices = true
         defer { isSwitchingVideoDevices = false }
         await captureService.selectNextVideoDevice()
@@ -84,11 +89,13 @@ final class CameraModel: Camera {
     
     /// Captures a photo and writes it to the user's Photos library.
     func capturePhoto() async {
+        guard !Self.isPreview else { return }
         // TODO:
     }
 
     /// Performs a focus and expose operation at the specified screen point.
     func focusAndExpose(at point: CGPoint) async {
+        guard !Self.isPreview else { return }
         await captureService.focusAndExpose(at: point)
     }
     
@@ -127,4 +134,6 @@ final class CameraModel: Camera {
             }
         }
     }
+
+    private static let isPreview: Bool = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
 }
