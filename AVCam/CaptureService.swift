@@ -47,10 +47,7 @@ actor CaptureService {
     
     // An object the service uses to retrieve capture devices.
     private let deviceLookup = DeviceLookup()
-    
-    // An object that monitors the state of the system-preferred camera.
-    private let systemPreferredCamera = SystemPreferredCameraObserver()
-    
+
     // An object that monitors video device rotations.
     private var rotationCoordinator: AVCaptureDevice.RotationCoordinator!
     private var rotationObservers = [AnyObject]()
@@ -141,8 +138,6 @@ actor CaptureService {
             
             // Configure controls to use with the Camera Control.
             configureControls(for: defaultCamera)
-            // Monitor the system-preferred camera state.
-            monitorSystemPreferredCamera()
             // Configure a rotation coordinator for the default video device.
             createRotationCoordinator(for: defaultCamera)
             // Observe changes to the default camera's subject area.
@@ -337,26 +332,7 @@ actor CaptureService {
             captureSession.addInput(currentInput)
         }
     }
-    
-    /// Monitors changes to the system's preferred camera selection.
-    ///
-    /// iPadOS supports external cameras. When someone connects an external camera to their iPad,
-    /// they're signaling the intent to use the device. The system responds by updating the
-    /// system-preferred camera (SPC) selection to this new device. When this occurs, if the SPC
-    /// isn't the currently selected camera, switch to the new device.
-    private func monitorSystemPreferredCamera() {
-        Task {
-            // An object monitors changes to system-preferred camera (SPC) value.
-            for await camera in systemPreferredCamera.changes {
-                // If the SPC isn't the currently selected camera, attempt to change to that device.
-                if let camera, currentDevice != camera {
-                    logger.debug("Switching camera selection to the system-preferred camera.")
-                    changeCaptureDevice(to: camera)
-                }
-            }
-        }
-    }
-    
+
     // MARK: - Rotation handling
     
     /// Create a new rotation coordinator for the specified device and observe its state to monitor rotation changes.
