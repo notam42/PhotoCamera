@@ -9,11 +9,6 @@ import SwiftUI
 
 /// An object that provides the interface to the features of the camera.
 ///
-/// This object provides the default implementation of the `Camera` protocol, which defines the interface
-/// to configure the camera hardware and capture media. `CameraModel` doesn't perform capture itself, but is an
-/// `@Observable` type that mediates interactions between the app's SwiftUI views and `CaptureService`.
-///
-@Observable
 @MainActor
 final class Camera {
     
@@ -59,7 +54,7 @@ final class Camera {
             return
         }
 
-        // Verify that the person authorizes the app to use device cameras and microphones.
+        // Verify that the person authorizes the app to use device cameras.
         guard await captureService.isAuthorized else {
             status = .unauthorized
             return
@@ -90,6 +85,7 @@ final class Camera {
     /// Captures a photo and writes it to the user's Photos library.
     func capturePhoto() async {
         guard !Self.isPreview else { return }
+        logger.info("Photo captured")
         // TODO:
     }
 

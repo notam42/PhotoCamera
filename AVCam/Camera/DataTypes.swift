@@ -13,7 +13,7 @@ import AVFoundation
 enum CameraStatus {
     /// The initial status upon creation.
     case unknown
-    /// A status that indicates a person disallows access to the camera or microphone.
+    /// A status that indicates a person disallows access to the camera
     case unauthorized
     /// A status that indicates the camera failed to start.
     case failed

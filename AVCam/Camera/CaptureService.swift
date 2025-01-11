@@ -62,8 +62,8 @@ actor CaptureService {
     
     // MARK: - Authorization
     /// A Boolean value that indicates whether a person authorizes this app to use
-    /// device cameras and microphones. If they haven't previously authorized the
-    /// app, querying this property prompts them for authorization.
+    /// device cameras. If they haven't previously authorized the app, querying this
+    /// property prompts them for authorization.
     var isAuthorized: Bool {
         get async {
             let status = AVCaptureDevice.authorizationStatus(for: .video)
@@ -99,13 +99,11 @@ actor CaptureService {
         observeCaptureControlsState()
         
         do {
-            // Retrieve the default camera and microphone.
+            // Retrieve the default camera
             let defaultCamera = try deviceLookup.defaultCamera
-            let defaultMic = try deviceLookup.defaultMic
 
-            // Add inputs for the default camera and microphone devices.
+            // Add inputs for the default camera devices.
             activeVideoInput = try addInput(for: defaultCamera)
-            try addInput(for: defaultMic)
 
             // Configure the session preset based on the current capture mode.
             captureSession.sessionPreset = .photo

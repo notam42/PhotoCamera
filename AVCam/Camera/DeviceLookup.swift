@@ -2,12 +2,12 @@
 See the LICENSE.txt file for this sample’s licensing information.
 
 Abstract:
-An object that retrieves camera and microphone devices.
+An object that retrieves camera devices.
 */
 
 import AVFoundation
 
-/// An object that retrieves camera and microphone devices.
+/// An object that retrieves camera devices.
 final class DeviceLookup {
     
     // Discovery sessions to find the front and back cameras, and external cameras in iPadOS.
@@ -41,17 +41,7 @@ final class DeviceLookup {
             return videoDevice
         }
     }
-    
-    /// Returns the default microphone for the device on which the app runs.
-    var defaultMic: AVCaptureDevice {
-        get throws {
-            guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
-                throw CameraError.audioDeviceUnavailable
-            }
-            return audioDevice
-        }
-    }
-    
+
     var cameras: [AVCaptureDevice] {
         // Populate the cameras array with the available cameras.
         var cameras: [AVCaptureDevice] = []
