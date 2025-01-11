@@ -28,15 +28,7 @@ enum CameraStatus {
 /// This type provides feedback to the UI regarding the active status of the `CaptureService` actor.
 enum CaptureActivity {
     case idle
-    /// A status that indicates the capture service is performing photo capture.
-    case photoCapture(willCapture: Bool = false)
-
-    var willCapture: Bool {
-        if case .photoCapture(let willCapture) = self {
-            return willCapture
-        }
-        return false
-    }
+    case willCapture
 }
 
 /// A structure that represents a captured photo.
@@ -46,7 +38,6 @@ struct Photo: Sendable {
 
 enum CameraError: Error {
     case videoDeviceUnavailable
-    case audioDeviceUnavailable
     case addInputFailed
     case addOutputFailed
     case setupFailed

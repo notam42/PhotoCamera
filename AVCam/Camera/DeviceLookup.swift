@@ -16,15 +16,9 @@ final class DeviceLookup {
     private let externalCameraDiscoverSession: AVCaptureDevice.DiscoverySession
     
     init() {
-        backCameraDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInWideAngleCamera],
-                                                                      mediaType: .video,
-                                                                      position: .back)
-        frontCameraDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTrueDepthCamera, .builtInWideAngleCamera],
-                                                                       mediaType: .video,
-                                                                       position: .front)
-        externalCameraDiscoverSession = AVCaptureDevice.DiscoverySession(deviceTypes: [.external],
-                                                                         mediaType: .video,
-                                                                         position: .unspecified)
+        backCameraDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInWideAngleCamera], mediaType: .video, position: .back)
+        frontCameraDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTrueDepthCamera, .builtInWideAngleCamera], mediaType: .video, position: .front)
+        externalCameraDiscoverSession = AVCaptureDevice.DiscoverySession(deviceTypes: [.external], mediaType: .video, position: .unspecified)
         
         // If the host doesn't currently define a system-preferred camera device, set the user's preferred selection to the back camera.
         if AVCaptureDevice.systemPreferredCamera == nil {

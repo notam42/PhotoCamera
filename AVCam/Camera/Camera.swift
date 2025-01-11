@@ -15,10 +15,7 @@ final class Camera {
     
     /// The current status of the camera, such as unauthorized, running, or failed.
     private(set) var status = CameraStatus.unknown
-    
-    /// The current state of photo or movie capture.
-    private(set) var captureActivity = CaptureActivity.idle
-    
+
     /// A Boolean value that indicates whether the app is currently switching video devices.
     private(set) var isSwitchingVideoDevices = false
 
@@ -109,12 +106,9 @@ final class Camera {
         Task {
             // Await new capture activity values from the capture service.
             for await activity in await captureService.$captureActivity.values {
-                if activity.willCapture {
+                if activity == .willCapture {
                     // Flash the screen to indicate capture is starting.
                     flashScreen()
-                } else {
-                    // Forward the activity to the UI.
-                    captureActivity = activity
                 }
             }
         }

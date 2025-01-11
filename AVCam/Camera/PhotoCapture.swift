@@ -54,15 +54,15 @@ final class PhotoCapture {
             photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
         }
         
-        /// Set the format of the preview image to capture. The `photoSettings` object returns the available
-        /// preview format types in order of compatibility with the primary image.
+        // Set the format of the preview image to capture. The `photoSettings` object returns the available
+        // preview format types in order of compatibility with the primary image.
         if let previewPhotoPixelFormatType = photoSettings.availablePreviewPhotoPixelFormatTypes.first {
             photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: previewPhotoPixelFormatType]
         }
         
-        /// Set the largest dimensions that the photo output supports.
-        /// `CaptureService` automatically updates the photo output's `maxPhotoDimensions`
-        /// when the capture pipeline changes.
+        // Set the largest dimensions that the photo output supports.
+        // `CaptureService` automatically updates the photo output's `maxPhotoDimensions`
+        // when the capture pipeline changes.
         photoSettings.maxPhotoDimensions = photoOutput.maxPhotoDimensions
 
         return photoSettings
@@ -130,13 +130,9 @@ private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
         self.activityContinuation = activityContinuation
     }
     
-    func photoOutput(_ output: AVCapturePhotoOutput, willBeginCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
-        activityContinuation.yield(.photoCapture())
-    }
-    
     func photoOutput(_ output: AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
         // Signal that a capture is beginning.
-        activityContinuation.yield(.photoCapture(willCapture: true))
+        activityContinuation.yield(.willCapture)
     }
 
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
