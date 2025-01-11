@@ -6,7 +6,7 @@ An object that manages a capture session and its inputs and outputs.
 */
 
 import Foundation
-import AVFoundation
+@preconcurrency import AVFoundation
 import Combine
 
 /// An actor that manages the capture pipeline, which includes the capture session, device inputs, and capture outputs.
