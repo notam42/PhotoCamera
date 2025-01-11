@@ -18,7 +18,6 @@
 		C4DFD84428C3E173005B74F0 /* DataTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DFD84328C3E173005B74F0 /* DataTypes.swift */; };
 		C4DFD84628C3ED3D005B74F0 /* StatusOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DFD84528C3ED3D005B74F0 /* StatusOverlayView.swift */; };
 		C4E15AAF2898620E00827683 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E15AAE2898620E00827683 /* CameraView.swift */; };
-		C4E15AB12898660900827683 /* PhotoCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E15AB02898660900827683 /* PhotoCapture.swift */; };
 		C4F82C9D285ADDA2005D427A /* AVCamApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F82C9C285ADDA2005D427A /* AVCamApp.swift */; };
 		C4F82CA1285ADDA3005D427A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4F82CA0285ADDA3005D427A /* Assets.xcassets */; };
 		C4F82CA5285ADDA3005D427A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4F82CA4285ADDA3005D427A /* Preview Assets.xcassets */; };
@@ -64,7 +63,6 @@
 		C4DFD84328C3E173005B74F0 /* DataTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataTypes.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4DFD84528C3ED3D005B74F0 /* StatusOverlayView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusOverlayView.swift; sourceTree = "<group>"; };
 		C4E15AAE2898620E00827683 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; usesTabs = 0; };
-		C4E15AB02898660900827683 /* PhotoCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCapture.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4F82C99285ADDA2005D427A /* AVCam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AVCam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4F82C9C285ADDA2005D427A /* AVCamApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVCamApp.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4F82CA0285ADDA3005D427A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -118,7 +116,6 @@
 			isa = PBXGroup;
 			children = (
 				C4DFD84328C3E173005B74F0 /* DataTypes.swift */,
-				C4E15AB02898660900827683 /* PhotoCapture.swift */,
 				C472D845285BBFA60082244A /* DeviceLookup.swift */,
 				C4F82CCB285AE206005D427A /* CaptureService.swift */,
 				C48091832BD584AD00753C4A /* Camera.swift */,
@@ -262,7 +259,6 @@
 				C44DC7BE289AC3DD0099BB87 /* PreviewContainer.swift in Sources */,
 				C48091852BD584AD00753C4A /* Camera.swift in Sources */,
 				C4F82CCE285AE233005D427A /* CameraPreview.swift in Sources */,
-				C4E15AB12898660900827683 /* PhotoCapture.swift in Sources */,
 				C4F82CCC285AE206005D427A /* CaptureService.swift in Sources */,
 				C4F82C9D285ADDA2005D427A /* AVCamApp.swift in Sources */,
 				C472D84F285BDFA60082244A /* MainToolbar.swift in Sources */,

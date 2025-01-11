@@ -18,9 +18,9 @@ actor CaptureService {
     // The app's capture session.
     nonisolated let captureSession = AVCaptureSession()
     
-    // An object that manages the app's photo capture behavior.
-    private let photoCapture = PhotoCapture()
-    
+    /// The capture output type for this service.
+    let output = AVCapturePhotoOutput()
+
     // The video input for the currently selected device camera.
     private var activeVideoInput: AVCaptureDeviceInput?
 
@@ -79,7 +79,6 @@ actor CaptureService {
         guard !isSetUp else { return }
 
         // Observe internal state and notifications.
-        observeOutputServices()
         observeNotifications()
 
         do {
@@ -92,7 +91,7 @@ actor CaptureService {
             // Configure the session preset based on the current capture mode.
             captureSession.sessionPreset = .photo
             // Add the photo capture output as the default output type.
-            try addOutput(photoCapture.output)
+            try addOutput(output)
 
             // Configure controls to use with the Camera Control.
             configureControls(for: defaultCamera)
@@ -298,7 +297,8 @@ actor CaptureService {
     }
     
     private func updateCaptureRotation(_ angle: CGFloat) {
-        photoCapture.setVideoRotationAngle(angle)
+        // Set the rotation angle on the output object's video connection.
+        output.connection(with: .video)?.videoRotationAngle = angle
     }
     
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer {
@@ -367,8 +367,37 @@ actor CaptureService {
     }
     
     // MARK: - Photo capture
+
     func capturePhoto() {
-        photoCapture.capturePhoto()
+        // Create a new settings object to configure the photo capture.
+        var photoSettings = AVCapturePhotoSettings()
+
+        // Capture photos in HEIF format when the device supports it.
+        if output.availablePhotoCodecTypes.contains(.hevc) {
+            photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
+        }
+
+        // Set the format of the preview image to capture. The `photoSettings` object returns the available
+        // preview format types in order of compatibility with the primary image.
+        if let previewPhotoPixelFormatType = photoSettings.availablePreviewPhotoPixelFormatTypes.first {
+            photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: previewPhotoPixelFormatType]
+        }
+
+        // Set the largest dimensions that the photo output supports.
+        // `CaptureService` automatically updates the photo output's `maxPhotoDimensions`
+        // when the capture pipeline changes.
+        photoSettings.maxPhotoDimensions = output.maxPhotoDimensions
+
+        let delegate = PhotoCaptureDelegate()
+        Task {
+            // Asynchronously monitor the activity of the delegate while the system performs capture.
+            for await activity in delegate.activityStream {
+                captureActivity = activity
+            }
+        }
+
+        // Capture a new photo with the specified settings.
+        output.capturePhoto(with: photoSettings, delegate: delegate)
     }
 
     // MARK: - Internal state management
@@ -378,14 +407,10 @@ actor CaptureService {
     /// calls this method to update its configuration and capabilities. The app uses this state to
     /// determine which features to enable in the user interface.
     private func updateCaptureCapabilities() {
-        // Update the output service configuration.
-        photoCapture.updateConfiguration(for: currentDevice)
-    }
-    
-    /// Merge the `captureActivity` values of the photo and movie capture services,
-    /// and assign the value to the actor's property.`
-    private func observeOutputServices() {
-        photoCapture.$captureActivity.assign(to: &$captureActivity)
+        output.maxPhotoDimensions = currentDevice.activeFormat.supportedMaxPhotoDimensions.last ?? CMVideoDimensions()
+        output.maxPhotoQualityPrioritization = .quality
+        output.isResponsiveCaptureEnabled = output.isResponsiveCaptureSupported
+        output.isFastCapturePrioritizationEnabled = output.isFastCapturePrioritizationSupported
     }
 
     /// Observe capture-related notifications.
@@ -401,5 +426,48 @@ actor CaptureService {
                 }
             }
         }
+    }
+}
+
+
+// MARK: - A photo capture delegate to process the captured photo.
+
+/// An object that adopts the `AVCapturePhotoCaptureDelegate` protocol to respond to photo capture life-cycle events.
+///
+/// The delegate produces a stream of events that indicate its current state of processing.
+class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
+
+    private var photoData: Data?
+
+    /// A stream of capture activity values that indicate the current state of progress.
+    let activityStream: AsyncStream<CaptureActivity>
+    private let activityContinuation: AsyncStream<CaptureActivity>.Continuation
+
+    /// Creates a new delegate object with the checked continuation to call when processing is complete.
+    override init() {
+        let (activityStream, activityContinuation) = AsyncStream.makeStream(of: CaptureActivity.self)
+        self.activityStream = activityStream
+        self.activityContinuation = activityContinuation
+    }
+
+    func photoOutput(_ output: AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
+        // Signal that a capture is beginning.
+        activityContinuation.yield(.willCapture)
+    }
+
+    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+        if let error = error {
+            logger.debug("Error capturing photo: \(String(describing: error))")
+            return
+        }
+        photoData = photo.fileDataRepresentation()
+    }
+
+    func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
+        if let error {
+            logger.error("Capture error: \(error.localizedDescription)")
+        }
+        activityContinuation.yield(.didCapture(data: photoData))
+        activityContinuation.finish()
     }
 }
