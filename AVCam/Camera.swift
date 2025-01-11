@@ -15,7 +15,7 @@ import SwiftUI
 ///
 @Observable
 @MainActor
-final class CameraModel {
+final class Camera {
     
     /// The current status of the camera, such as unauthorized, running, or failed.
     private(set) var status = CameraStatus.unknown

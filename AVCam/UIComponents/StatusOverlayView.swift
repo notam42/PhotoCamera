@@ -57,13 +57,13 @@ struct StatusOverlayView: View {
 }
 
 #Preview("Interrupted") {
-    CameraView(camera: CameraModel(status: .interrupted))
+    CameraView(camera: Camera(status: .interrupted))
 }
 
 #Preview("Failed") {
-    CameraView(camera: CameraModel(status: .failed))
+    CameraView(camera: Camera(status: .failed))
 }
 
 #Preview("Unauthorized") {
-    CameraView(camera: CameraModel(status: .unauthorized))
+    CameraView(camera: Camera(status: .unauthorized))
 }

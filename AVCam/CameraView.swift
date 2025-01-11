@@ -15,7 +15,7 @@ struct CameraView: PlatformView {
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     
-    @State var camera: CameraModel
+    @State var camera: Camera
 
     var body: some View {
         ZStack {
@@ -48,5 +48,5 @@ struct CameraView: PlatformView {
 }
 
 #Preview {
-    CameraView(camera: CameraModel())
+    CameraView(camera: Camera())
 }

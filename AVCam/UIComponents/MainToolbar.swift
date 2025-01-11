@@ -14,7 +14,7 @@ struct MainToolbar: PlatformView {
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     
-    @State var camera: CameraModel
+    @State var camera: Camera
     
     var body: some View {
         HStack {
@@ -40,6 +40,6 @@ struct MainToolbar: PlatformView {
 
 #Preview {
     Group {
-        MainToolbar(camera: CameraModel())
+        MainToolbar(camera: Camera())
     }
 }

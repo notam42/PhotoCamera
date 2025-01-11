@@ -11,7 +11,7 @@ import SwiftUI
 @MainActor
 struct CaptureButton: View {
     
-    @State var camera: CameraModel
+    @State var camera: Camera
 
     private let mainButtonDimension: CGFloat = 68
     
@@ -32,7 +32,7 @@ struct CaptureButton: View {
 }
 
 #Preview("Photo") {
-    CaptureButton(camera: CameraModel())
+    CaptureButton(camera: Camera())
 }
 
 private struct PhotoCaptureButton: View {

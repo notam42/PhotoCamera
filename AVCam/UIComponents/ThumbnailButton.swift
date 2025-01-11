@@ -13,7 +13,7 @@ import PhotosUI
 /// Tapping the view opens the Photos picker.
 struct ThumbnailButton: View {
     
-	@State var camera: CameraModel
+	@State var camera: Camera
     
     @State private var selectedItems: [PhotosPickerItem] = []
 	

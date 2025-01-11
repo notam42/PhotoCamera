@@ -13,7 +13,7 @@
 		C472D846285BBFA60082244A /* DeviceLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = C472D845285BBFA60082244A /* DeviceLookup.swift */; };
 		C472D84F285BDFA60082244A /* MainToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C472D84D285BDFA60082244A /* MainToolbar.swift */; };
 		C475973128A71BEC00D1D029 /* CaptureButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C475973028A71BEC00D1D029 /* CaptureButton.swift */; };
-		C48091852BD584AD00753C4A /* CameraModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48091832BD584AD00753C4A /* CameraModel.swift */; };
+		C48091852BD584AD00753C4A /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48091832BD584AD00753C4A /* Camera.swift */; };
 		C4A349DF28BD4B700056FAAF /* SwitchCameraButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A349DE28BD4B700056FAAF /* SwitchCameraButton.swift */; };
 		C4CB95D02BF06EA6000CF8C7 /* CameraUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4CB95CF2BF06EA6000CF8C7 /* CameraUI.swift */; };
 		C4DFD84428C3E173005B74F0 /* DataTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DFD84328C3E173005B74F0 /* DataTypes.swift */; };
@@ -59,7 +59,7 @@
 		C472D845285BBFA60082244A /* DeviceLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceLookup.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C472D84D285BDFA60082244A /* MainToolbar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainToolbar.swift; sourceTree = "<group>"; };
 		C475973028A71BEC00D1D029 /* CaptureButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureButton.swift; sourceTree = "<group>"; usesTabs = 0; };
-		C48091832BD584AD00753C4A /* CameraModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraModel.swift; sourceTree = "<group>"; usesTabs = 0; };
+		C48091832BD584AD00753C4A /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4A349DE28BD4B700056FAAF /* SwitchCameraButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchCameraButton.swift; sourceTree = "<group>"; };
 		C4C6E1FE2CA1CF250081A8EA /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		C4CB95CF2BF06EA6000CF8C7 /* CameraUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraUI.swift; sourceTree = "<group>"; usesTabs = 0; };
@@ -168,7 +168,7 @@
 				C470F0EF2899E2FB004D4515 /* Model */,
 				C472D847285BD4A40082244A /* Views */,
 				C400F46428DFDD4800861093 /* UIComponents */,
-				C48091832BD584AD00753C4A /* CameraModel.swift */,
+				C48091832BD584AD00753C4A /* Camera.swift */,
 				C4F82CCB285AE206005D427A /* CaptureService.swift */,
 				C4E15AAE2898620E00827683 /* CameraView.swift */,
 				C4F82C9C285ADDA2005D427A /* AVCamApp.swift */,
@@ -271,7 +271,7 @@
 			files = (
 				C4A349DF28BD4B700056FAAF /* SwitchCameraButton.swift in Sources */,
 				C44DC7BE289AC3DD0099BB87 /* PreviewContainer.swift in Sources */,
-				C48091852BD584AD00753C4A /* CameraModel.swift in Sources */,
+				C48091852BD584AD00753C4A /* Camera.swift in Sources */,
 				C4F82CCE285AE233005D427A /* CameraPreview.swift in Sources */,
 				C4E15AB12898660900827683 /* PhotoCapture.swift in Sources */,
 				C4F82CCC285AE206005D427A /* CaptureService.swift in Sources */,
