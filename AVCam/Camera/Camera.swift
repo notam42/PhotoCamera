@@ -30,10 +30,15 @@ final class Camera {
     private(set) var error: Error?
 
     /// An object that manages the app's capture functionality.
-    private let captureService = CaptureService()
+    private let captureService: CaptureService
 
-    init(status: CameraStatus = .unknown) {
+    init(forSelfie: Bool = false) {
+        self.captureService = CaptureService(forSelfie: forSelfie)
+    }
+
+    init(status: CameraStatus) { // for previews only
         self.status = status
+        self.captureService = CaptureService(forSelfie: false)
     }
 
     // MARK: - Starting the camera

@@ -15,36 +15,43 @@ actor CaptureService {
     /// A value that indicates whether the capture service is idle or capturing a photo or movie.
     @Published private(set) var captureActivity: CaptureActivity = .idle
 
-    // The app's capture session.
+    /// The app's capture session.
     nonisolated let captureSession = AVCaptureSession()
-    
+
+    /// Whether to use the front camera first
+    let forSelfie: Bool
+
     /// The capture output type for this service.
     let output = AVCapturePhotoOutput()
 
-    // The video input for the currently selected device camera.
+    /// The video input for the currently selected device camera.
     private var activeVideoInput: AVCaptureDeviceInput?
 
-    // An object the service uses to retrieve capture devices.
+    /// An object the service uses to retrieve capture devices.
     private let deviceLookup = DeviceLookup()
 
-    // An object that monitors video device rotations.
+    /// An object that monitors video device rotations.
     private var rotationCoordinator: AVCaptureDevice.RotationCoordinator!
     private var rotationObservers = [AnyObject]()
     
-    // A Boolean value that indicates whether the actor finished its required configuration.
+    /// A Boolean value that indicates whether the actor finished its required configuration.
     private var isSetUp = false
 
-    // A map that stores capture controls by device identifier.
+    /// A map that stores capture controls by device identifier.
     private var controlsMap: [String: [AVCaptureControl]] = [:]
     
-    // A serial dispatch queue to use for capture control actions.
+    /// A serial dispatch queue to use for capture control actions.
     private let sessionQueue = DispatchSerialQueue(label: "com.melikyan.CameraView")
     
-    // Sets the session queue as the actor's executor.
+    /// Sets the session queue as the actor's executor.
     nonisolated var unownedExecutor: UnownedSerialExecutor {
         sessionQueue.asUnownedSerialExecutor()
     }
-    
+
+    init(forSelfie: Bool) {
+        self.forSelfie = forSelfie
+    }
+
     // MARK: - Authorization
     /// A Boolean value that indicates whether a person authorizes this app to use
     /// device cameras. If they haven't previously authorized the app, querying this
@@ -83,7 +90,7 @@ actor CaptureService {
 
         do {
             // Retrieve the default camera
-            let defaultCamera = try deviceLookup.defaultCamera
+            let defaultCamera = try deviceLookup.defaultCamera(forSelfie: forSelfie)
 
             // Add inputs for the default camera devices.
             activeVideoInput = try addInput(for: defaultCamera)

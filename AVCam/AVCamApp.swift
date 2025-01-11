@@ -12,7 +12,7 @@ import SwiftUI
 /// The AVCam app's main entry point.
 struct AVCamApp: App {
 
-    @State private var camera = Camera()
+    @State private var camera = Camera(forSelfie: true)
     
     // An indication of the scene's operational state.
     @Environment(\.scenePhase) var scenePhase

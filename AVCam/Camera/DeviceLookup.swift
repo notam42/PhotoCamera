@@ -11,29 +11,16 @@ import AVFoundation
 final class DeviceLookup {
     
     // Discovery sessions to find the front and back cameras, and external cameras in iPadOS.
-    private let frontCameraDiscoverySession: AVCaptureDevice.DiscoverySession
-    private let backCameraDiscoverySession: AVCaptureDevice.DiscoverySession
-    private let externalCameraDiscoverSession: AVCaptureDevice.DiscoverySession
-    
-    init() {
-        backCameraDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInWideAngleCamera], mediaType: .video, position: .back)
-        frontCameraDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTrueDepthCamera, .builtInWideAngleCamera], mediaType: .video, position: .front)
-        externalCameraDiscoverSession = AVCaptureDevice.DiscoverySession(deviceTypes: [.external], mediaType: .video, position: .unspecified)
-        
-        // If the host doesn't currently define a system-preferred camera device, set the user's preferred selection to the back camera.
-        if AVCaptureDevice.systemPreferredCamera == nil {
-            AVCaptureDevice.userPreferredCamera = backCameraDiscoverySession.devices.first
-        }
-    }
-    
+    private let frontCameraDiscoverySession: AVCaptureDevice.DiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInWideAngleCamera], mediaType: .video, position: .front)
+    private let backCameraDiscoverySession: AVCaptureDevice.DiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTrueDepthCamera, .builtInWideAngleCamera], mediaType: .video, position: .back)
+    private let externalCameraDiscoverSession: AVCaptureDevice.DiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.external], mediaType: .video, position: .unspecified)
+
     /// Returns the system-preferred camera for the host system.
-    var defaultCamera: AVCaptureDevice {
-        get throws {
-            guard let videoDevice = AVCaptureDevice.systemPreferredCamera else {
-                throw CameraError.videoDeviceUnavailable
-            }
-            return videoDevice
+    func defaultCamera(forSelfie: Bool) throws -> AVCaptureDevice {
+        guard let result = forSelfie ? frontCameraDiscoverySession.devices.first : (backCameraDiscoverySession.devices.first ?? externalCameraDiscoverSession.devices.first) else {
+            throw CameraError.videoDeviceUnavailable
         }
+        return result
     }
 
     var cameras: [AVCaptureDevice] {
