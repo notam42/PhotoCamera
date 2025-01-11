@@ -395,7 +395,7 @@ actor CaptureService {
     }
     
     // MARK: - Photo capture
-    func capturePhoto() async throws -> Photo {
+    func capturePhoto() async throws -> Data {
         try await photoCapture.capturePhoto()
     }
 

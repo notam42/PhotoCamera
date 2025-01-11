@@ -103,7 +103,7 @@ final class Camera {
         Task {
             // Await new capture activity values from the capture service.
             for await activity in await captureService.$captureActivity.values {
-                if activity == .willCapture {
+                if case .willCapture = activity {
                     // Flash the screen to indicate capture is starting.
                     flashScreen()
                 }

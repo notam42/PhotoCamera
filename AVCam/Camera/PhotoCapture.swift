@@ -27,7 +27,7 @@ final class PhotoCapture {
     // MARK: - Capture a photo.
     
     /// The app calls this method when the user taps the photo capture button.
-    func capturePhoto() async throws -> Photo {
+    func capturePhoto() async throws -> Data {
         // Wrap the delegate-based capture API in a continuation to use it in an async context.
         try await withCheckedThrowingContinuation { continuation in
             
@@ -104,7 +104,7 @@ final class PhotoCapture {
     }
 }
 
-typealias PhotoContinuation = CheckedContinuation<Photo, Error>
+typealias PhotoContinuation = CheckedContinuation<Data, Error>
 
 // MARK: - A photo capture delegate to process the captured photo.
 
@@ -162,9 +162,7 @@ private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
             return
         }
         
-        /// Create a photo object to save to the `MediaLibrary`.
-        let photo = Photo(data: photoData)
         // Resume the continuation by returning the captured photo.
-        continuation.resume(returning: photo)
+        continuation.resume(returning: photoData)
     }
 }

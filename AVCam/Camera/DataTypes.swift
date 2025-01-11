@@ -31,11 +31,6 @@ enum CaptureActivity {
     case willCapture
 }
 
-/// A structure that represents a captured photo.
-struct Photo: Sendable {
-    let data: Data
-}
-
 enum CameraError: Error {
     case videoDeviceUnavailable
     case addInputFailed
