@@ -26,9 +26,6 @@ protocol Camera: AnyObject {
     /// Starts the camera capture pipeline.
     func start() async
 
-    /// The capture mode, which can be photo or video.
-    var captureMode: CaptureMode { get set }
-    
     /// A Boolean value that indicates whether the camera is currently switching capture modes.
     var isSwitchingModes: Bool { get }
     
@@ -55,15 +52,6 @@ protocol Camera: AnyObject {
     
     /// A Boolean value that indicates whether to show visual feedback when capture begins.
     var shouldFlashScreen: Bool { get }
-    
-    /// A Boolean that indicates whether the camera supports HDR video recording.
-    var isHDRVideoSupported: Bool { get }
-    
-    /// A Boolean value that indicates whether camera enables HDR video recording.
-    var isHDRVideoEnabled: Bool { get set }
-    
-    /// Starts or stops recording a movie, and writes it to the user's photo library when complete.
-    func toggleRecording() async
     
     /// A thumbnail image for the most recent photo or video capture.
     var thumbnail: CGImage? { get }

@@ -31,29 +31,16 @@ struct CaptureButton<CameraModel: Camera>: View {
     
     @ViewBuilder
     var captureButton: some View {
-        switch camera.captureMode {
-        case .photo:
-            PhotoCaptureButton {
-                Task {
-                    await camera.capturePhoto()
-                }
-            }
-        case .video:
-            MovieCaptureButton(isRecording: $isRecording) { _ in
-                Task {
-                    await camera.toggleRecording()
-                }
+        PhotoCaptureButton {
+            Task {
+                await camera.capturePhoto()
             }
         }
     }
 }
 
 #Preview("Photo") {
-    CaptureButton(camera: PreviewCameraModel(captureMode: .photo))
-}
-
-#Preview("Video") {
-    CaptureButton(camera: PreviewCameraModel(captureMode: .video))
+    CaptureButton(camera: PreviewCameraModel())
 }
 
 private struct PhotoCaptureButton: View {

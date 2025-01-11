@@ -15,8 +15,6 @@ class PreviewCameraModel: Camera {
     var prefersMinimizedUI = false
     var qualityPrioritization = QualityPrioritization.quality
     var shouldFlashScreen = false
-    var isHDRVideoSupported = false
-    var isHDRVideoEnabled = false
     
     struct PreviewSourceStub: PreviewSource {
         // Stubbed out for test purposes.
@@ -27,16 +25,6 @@ class PreviewCameraModel: Camera {
     
     private(set) var status = CameraStatus.unknown
     private(set) var captureActivity = CaptureActivity.idle
-    var captureMode = CaptureMode.photo {
-        didSet {
-            isSwitchingModes = true
-            Task {
-                // Create a short delay to mimic the time it takes to reconfigure the session.
-                try? await Task.sleep(until: .now + .seconds(0.3), clock: .continuous)
-                self.isSwitchingModes = false
-            }
-        }
-    }
     private(set) var isSwitchingModes = false
     private(set) var isVideoDeviceSwitchable = true
     private(set) var isSwitchingVideoDevices = false
@@ -44,8 +32,7 @@ class PreviewCameraModel: Camera {
     
     var error: Error?
     
-    init(captureMode: CaptureMode = .photo, status: CameraStatus = .unknown) {
-        self.captureMode = captureMode
+    init(status: CameraStatus = .unknown) {
         self.status = status
     }
     
@@ -73,14 +60,8 @@ class PreviewCameraModel: Camera {
     
     var recordingTime: TimeInterval { .zero }
     
-    private func capabilities(for mode: CaptureMode) -> CaptureCapabilities {
-        switch mode {
-        case .photo:
-            return CaptureCapabilities(isLivePhotoCaptureSupported: true)
-        case .video:
-            return CaptureCapabilities(isLivePhotoCaptureSupported: false,
-                                       isHDRSupported: true)
-        }
+    private var capabilities: CaptureCapabilities {
+        CaptureCapabilities(isLivePhotoCaptureSupported: true)
     }
     
     func syncState() async {

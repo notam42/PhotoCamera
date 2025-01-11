@@ -17,19 +17,7 @@ struct CameraState: Codable {
     var qualityPrioritization = QualityPrioritization.quality {
         didSet { save() }
     }
-    
-    var isVideoHDRSupported = true {
-        didSet { save() }
-    }
-    
-    var isVideoHDREnabled = true {
-        didSet { save() }
-    }
-    
-    var captureMode = CaptureMode.photo {
-        didSet { save() }
-    }
-    
+
     private func save() {
         Task {
             do {

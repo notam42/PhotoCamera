@@ -18,15 +18,8 @@ struct FeaturesToolbar<CameraModel: Camera>: PlatformView {
     var body: some View {
         HStack(spacing: 30) {
             Spacer()
-            switch camera.captureMode {
-            case .photo:
-                livePhotoButton
-                prioritizePicker
-            case .video:
-                if camera.isHDRVideoSupported {
-                    hdrButton
-                }
-            }
+            livePhotoButton
+            prioritizePicker
         }
         .buttonStyle(DefaultButtonStyle(size: isRegularSize ? .large : .small))
         .padding([.leading, .trailing])
@@ -63,27 +56,6 @@ struct FeaturesToolbar<CameraModel: Camera>: PlatformView {
                 Image(systemName: "dial.high")
             }
         }
-    }
-
-    @ViewBuilder
-    var hdrButton: some View {
-        if isCompactSize {
-            hdrToggleButton
-        } else {
-            hdrToggleButton
-                .buttonStyle(.bordered)
-                .buttonBorderShape(.capsule)
-        }
-    }
-    
-    var hdrToggleButton: some View {
-        Button {
-            camera.isHDRVideoEnabled.toggle()
-        } label: {
-            Text("HDR \(camera.isHDRVideoEnabled ? "On" : "Off")")
-                .font(.body.weight(.semibold))
-        }
-        .disabled(camera.captureActivity.isRecording)
     }
     
     @ViewBuilder

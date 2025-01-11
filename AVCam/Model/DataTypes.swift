@@ -62,24 +62,6 @@ enum CaptureActivity {
     }
 }
 
-/// An enumeration of the capture modes that the camera supports.
-enum CaptureMode: String, Identifiable, CaseIterable, Codable {
-    var id: Self { self }
-    /// A mode that enables photo capture.
-    case photo
-    /// A mode that enables video capture.
-    case video
-    
-    var systemName: String {
-        switch self {
-        case .photo:
-            "camera.fill"
-        case .video:
-            "video.fill"
-        }
-    }
-}
-
 /// A structure that represents a captured photo.
 struct Photo: Sendable {
     let data: Data
@@ -103,12 +85,9 @@ struct PhotoFeatures {
 struct CaptureCapabilities {
 
     let isLivePhotoCaptureSupported: Bool
-    let isHDRSupported: Bool
-    
-    init(isLivePhotoCaptureSupported: Bool = false,
-         isHDRSupported: Bool = false) {
+
+    init(isLivePhotoCaptureSupported: Bool = false) {
         self.isLivePhotoCaptureSupported = isLivePhotoCaptureSupported
-        self.isHDRSupported = isHDRSupported
     }
     
     static let unknown = CaptureCapabilities()

@@ -47,7 +47,7 @@ struct PreviewContainer<Content: View, CameraModel: Camera>: View {
             // Apply an appropriate aspect ratio based on the selected capture mode.
             .aspectRatio(aspectRatio, contentMode: .fit)
             // In photo mode, adjust the vertical offset of the preview area to better fit the UI.
-            .offset(y: camera.captureMode == .photo ? photoModeOffset : 0)
+            .offset(y: photoModeOffset)
         } else {
             // On regular-sized UIs, show the content in full screen.
             previewView
@@ -69,6 +69,6 @@ struct PreviewContainer<Content: View, CameraModel: Camera>: View {
     }
     
     var aspectRatio: AspectRatio {
-        camera.captureMode == .photo ? photoAspectRatio : movieAspectRatio
+        photoAspectRatio
     }
 }

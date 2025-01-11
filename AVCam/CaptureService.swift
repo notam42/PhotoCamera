@@ -19,8 +19,6 @@ actor CaptureService {
     @Published private(set) var captureCapabilities = CaptureCapabilities.unknown
     /// A Boolean value that indicates whether a higher priority event, like receiving a phone call, interrupts the app.
     @Published private(set) var isInterrupted = false
-    /// A Boolean value that indicates whether the user enables HDR video capture.
-    @Published var isHDRVideoEnabled = false
     /// A Boolean value that indicates whether capture controls are in a fullscreen appearance.
     @Published var isShowingFullscreenControls = false
     
@@ -33,18 +31,9 @@ actor CaptureService {
     // An object that manages the app's photo capture behavior.
     private let photoCapture = PhotoCapture()
     
-    // An object that manages the app's video capture behavior.
-    private let movieCapture = MovieCapture()
-    
-    // An internal collection of output services.
-    private var outputServices: [any OutputService] { [photoCapture, movieCapture] }
-    
     // The video input for the currently selected device camera.
     private var activeVideoInput: AVCaptureDeviceInput?
-    
-    // The mode of capture, either photo or video. Defaults to photo.
-    private(set) var captureMode = CaptureMode.photo
-    
+
     // An object the service uses to retrieve capture devices.
     private let deviceLookup = DeviceLookup()
 
@@ -94,10 +83,6 @@ actor CaptureService {
     
     // MARK: - Capture session life cycle
     func start(with state: CameraState) async throws {
-        // Set initial operating state.
-        captureMode = state.captureMode
-        isHDRVideoEnabled = state.isVideoHDREnabled
-        
         // Exit early if not authorized or the session is already running.
         guard await isAuthorized, !captureSession.isRunning else { return }
         // Configure the session and start it.
@@ -126,16 +111,10 @@ actor CaptureService {
             try addInput(for: defaultMic)
 
             // Configure the session preset based on the current capture mode.
-            captureSession.sessionPreset = captureMode == .photo ? .photo : .high
+            captureSession.sessionPreset = .photo
             // Add the photo capture output as the default output type.
             try addOutput(photoCapture.output)
-            // If the capture mode is set to Video, add a movie capture output.
-            if captureMode == .video {
-                // Add the movie output as the default output type.
-                try addOutput(movieCapture.output)
-                setHDRVideoEnabled(isHDRVideoEnabled)
-            }
-            
+
             // Configure controls to use with the Camera Control.
             configureControls(for: defaultCamera)
             // Configure a rotation coordinator for the default video device.
@@ -250,27 +229,14 @@ actor CaptureService {
     /// Changes the mode of capture, which can be `photo` or `video`.
     ///
     /// - Parameter `captureMode`: The capture mode to enable.
-    func setCaptureMode(_ captureMode: CaptureMode) throws {
-        // Update the internal capture mode value before performing the session configuration.
-        self.captureMode = captureMode
-        
+    @available(*, deprecated)
+    func setCaptureMode() throws {
         // Change the configuration atomically.
         captureSession.beginConfiguration()
         defer { captureSession.commitConfiguration() }
-        
-        // Configure the capture session for the selected capture mode.
-        switch captureMode {
-        case .photo:
-            // The app needs to remove the movie capture output to perform Live Photo capture.
-            captureSession.sessionPreset = .photo
-            captureSession.removeOutput(movieCapture.output)
-        case .video:
-            captureSession.sessionPreset = .high
-            try addOutput(movieCapture.output)
-            if isHDRVideoEnabled {
-                setHDRVideoEnabled(true)
-            }
-        }
+
+        // The app needs to remove the movie capture output to perform Live Photo capture.
+        captureSession.sessionPreset = .photo
 
         // Update the advertised capabilities after reconfiguration.
         updateCaptureCapabilities()
@@ -374,8 +340,7 @@ actor CaptureService {
     }
     
     private func updateCaptureRotation(_ angle: CGFloat) {
-        // Update the orientation for all output services.
-        outputServices.forEach { $0.setVideoRotationAngle(angle) }
+        photoCapture.setVideoRotationAngle(angle)
     }
     
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer {
@@ -447,40 +412,7 @@ actor CaptureService {
     func capturePhoto(with features: PhotoFeatures) async throws -> Photo {
         try await photoCapture.capturePhoto(with: features)
     }
-    
-    // MARK: - Movie capture
-    /// Starts recording video. The video records until the user stops recording,
-    /// which calls the following `stopRecording()` method.
-    func startRecording() {
-        movieCapture.startRecording()
-    }
-    
-    /// Stops the recording and returns the captured movie.
-    func stopRecording() async throws -> Movie {
-        try await movieCapture.stopRecording()
-    }
-    
-    /// Sets whether the app captures HDR video.
-    func setHDRVideoEnabled(_ isEnabled: Bool) {
-        // Bracket the following configuration in a begin/commit configuration pair.
-        captureSession.beginConfiguration()
-        defer { captureSession.commitConfiguration() }
-        do {
-            // If the current device provides a 10-bit HDR format, enable it for use.
-            if isEnabled, let format = currentDevice.activeFormat10BitVariant {
-                try currentDevice.lockForConfiguration()
-                currentDevice.activeFormat = format
-                currentDevice.unlockForConfiguration()
-                isHDRVideoEnabled = true
-            } else {
-                captureSession.sessionPreset = .high
-                isHDRVideoEnabled = false
-            }
-        } catch {
-            logger.error("Unable to obtain lock on device and can't enable HDR video capture.")
-        }
-    }
-    
+
     // MARK: - Internal state management
     /// Updates the state of the actor to ensure its advertised capabilities are accurate.
     ///
@@ -489,21 +421,15 @@ actor CaptureService {
     /// determine which features to enable in the user interface.
     private func updateCaptureCapabilities() {
         // Update the output service configuration.
-        outputServices.forEach { $0.updateConfiguration(for: currentDevice) }
+        photoCapture.updateConfiguration(for: currentDevice)
         // Set the capture service's capabilities for the selected mode.
-        switch captureMode {
-        case .photo:
-            captureCapabilities = photoCapture.capabilities
-        case .video:
-            captureCapabilities = movieCapture.capabilities
-        }
+        captureCapabilities = photoCapture.capabilities
     }
     
     /// Merge the `captureActivity` values of the photo and movie capture services,
     /// and assign the value to the actor's property.`
     private func observeOutputServices() {
-        Publishers.Merge(photoCapture.$captureActivity, movieCapture.$captureActivity)
-            .assign(to: &$captureActivity)
+        photoCapture.$captureActivity.assign(to: &$captureActivity)
     }
     
     /// Observe when capture control enter and exit a fullscreen appearance.

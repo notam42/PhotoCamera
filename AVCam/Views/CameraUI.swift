@@ -12,8 +12,7 @@ import AVFoundation
 struct CameraUI<CameraModel: Camera>: PlatformView {
 
     @State var camera: CameraModel
-    @Binding var swipeDirection: SwipeDirection
-    
+
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     
@@ -26,14 +25,8 @@ struct CameraUI<CameraModel: Camera>: PlatformView {
             }
         }
         .overlay(alignment: .top) {
-            switch camera.captureMode {
-            case .photo:
-                LiveBadge()
-                    .opacity(camera.captureActivity.isLivePhoto ? 1.0 : 0.0)
-            case .video:
-                RecordingTimeView(time: camera.captureActivity.currentTime)
-                    .offset(y: isRegularSize ? 20 : 0)
-            }
+            LiveBadge()
+                .opacity(camera.captureActivity.isLivePhoto ? 1.0 : 0.0)
         }
         .overlay {
             StatusOverlayView(status: camera.status)
@@ -46,7 +39,6 @@ struct CameraUI<CameraModel: Camera>: PlatformView {
         VStack(spacing: 0) {
             FeaturesToolbar(camera: camera)
             Spacer()
-            CaptureModeView(camera: camera, direction: $swipeDirection)
             MainToolbar(camera: camera)
                 .padding(.bottom, bottomPadding)
         }
@@ -58,8 +50,6 @@ struct CameraUI<CameraModel: Camera>: PlatformView {
         VStack {
             Spacer()
             ZStack {
-                CaptureModeView(camera: camera, direction: $swipeDirection)
-                    .offset(x: -250) // The vertical offset from center.
                 MainToolbar(camera: camera)
                 FeaturesToolbar(camera: camera)
                     .frame(width: 250)
@@ -71,15 +61,7 @@ struct CameraUI<CameraModel: Camera>: PlatformView {
             .padding(.bottom, 32)
         }
     }
-    
-    var swipeGesture: some Gesture {
-        DragGesture(minimumDistance: 50)
-            .onEnded {
-                // Capture the swipe direction.
-                swipeDirection = $0.translation.width < 0 ? .left : .right
-            }
-    }
-    
+
     var bottomPadding: CGFloat {
         // Dynamically calculate the offset for the bottom toolbar in iOS.
         let bounds = UIScreen.main.bounds
@@ -89,5 +71,5 @@ struct CameraUI<CameraModel: Camera>: PlatformView {
 }
 
 #Preview {
-    CameraUI(camera: PreviewCameraModel(), swipeDirection: .constant(.left))
+    CameraUI(camera: PreviewCameraModel())
 }

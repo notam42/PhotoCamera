@@ -46,9 +46,6 @@ final class CameraModel: Camera {
     /// An object that provides the connection between the capture session and the video preview layer.
     var previewSource: PreviewSource { captureService.previewSource }
     
-    /// A Boolean that indicates whether the camera supports HDR video recording.
-    private(set) var isHDRVideoSupported = false
-    
     /// An object that saves captured media to a person's Photos library.
     private let mediaLibrary = MediaLibrary()
     
@@ -88,29 +85,12 @@ final class CameraModel: Camera {
     /// `CameraState` represents the persistent state, such as the capture mode, that the app and extension share.
     func syncState() async {
         cameraState = await CameraState.current
-        captureMode = cameraState.captureMode
         qualityPrioritization = cameraState.qualityPrioritization
         isLivePhotoEnabled = cameraState.isLivePhotoEnabled
-        isHDRVideoEnabled = cameraState.isVideoHDREnabled
     }
     
-    // MARK: - Changing modes and devices
-    
-    /// A value that indicates the mode of capture for the camera.
-    var captureMode = CaptureMode.photo {
-        didSet {
-            guard status == .running else { return }
-            Task {
-                isSwitchingModes = true
-                defer { isSwitchingModes = false }
-                // Update the configuration of the capture service for the new mode.
-                try? await captureService.setCaptureMode(captureMode)
-                // Update the persistent state value.
-                cameraState.captureMode = captureMode
-            }
-        }
-    }
-    
+    // MARK: - Changing devices
+
     /// Selects the next available video device for capture.
     func switchVideoDevices() async {
         isSwitchingVideoDevices = true
@@ -159,37 +139,7 @@ final class CameraModel: Camera {
             shouldFlashScreen = false
         }
     }
-    
-    // MARK: - Video capture
-    /// A Boolean value that indicates whether the camera captures video in HDR format.
-    var isHDRVideoEnabled = false {
-        didSet {
-            guard status == .running, captureMode == .video else { return }
-            Task {
-                await captureService.setHDRVideoEnabled(isHDRVideoEnabled)
-                // Update the persistent state value.
-                cameraState.isVideoHDREnabled = isHDRVideoEnabled
-            }
-        }
-    }
-    
-    /// Toggles the state of recording.
-    func toggleRecording() async {
-        switch await captureService.captureActivity {
-        case .movieCapture:
-            do {
-                // If currently recording, stop the recording and write the movie to the library.
-                let movie = try await captureService.stopRecording()
-                try await mediaLibrary.save(movie: movie)
-            } catch {
-                self.error = error
-            }
-        default:
-            // In any other case, start recording.
-            await captureService.startRecording()
-        }
-    }
-    
+
     // MARK: - Internal state observations
     
     // Set up camera's state observations.
@@ -211,14 +161,6 @@ final class CameraModel: Camera {
                     // Forward the activity to the UI.
                     captureActivity = activity
                 }
-            }
-        }
-        
-        Task {
-            // Await updates to the capabilities that the capture service advertises.
-            for await capabilities in await captureService.$captureCapabilities.values {
-                isHDRVideoSupported = capabilities.isHDRSupported
-                cameraState.isVideoHDRSupported = capabilities.isHDRSupported
             }
         }
         
