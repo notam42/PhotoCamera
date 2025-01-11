@@ -5,14 +5,18 @@ Abstract:
 An object that provides the interface to the features of the camera.
 */
 
-import SwiftUI
+@preconcurrency import AVFoundation
+//import SwiftUI
 
 /// An object that provides the interface to the features of the camera.
 ///
 @Observable
 @MainActor
 final class Camera {
-    
+
+    /// The app's capture session.
+    var captureSession: AVCaptureSession { captureService.captureSession }
+
     /// The current status of the camera, such as unauthorized, running, or failed.
     private(set) var status = CameraStatus.unknown
 
@@ -24,10 +28,7 @@ final class Camera {
 
     /// An error that indicates the details of an error during photo or movie capture.
     private(set) var error: Error?
-    
-    /// An object that provides the connection between the capture session and the video preview layer.
-    var previewSource: PreviewSource { captureService.previewSource }
-    
+
     /// An object that manages the app's capture functionality.
     private let captureService = CaptureService()
 

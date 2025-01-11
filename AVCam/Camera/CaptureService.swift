@@ -15,11 +15,8 @@ actor CaptureService {
     /// A value that indicates whether the capture service is idle or capturing a photo or movie.
     @Published private(set) var captureActivity: CaptureActivity = .idle
 
-    /// A type that connects a preview destination with the capture session.
-    nonisolated let previewSource: PreviewSource
-    
     // The app's capture session.
-    private let captureSession = AVCaptureSession()
+    nonisolated let captureSession = AVCaptureSession()
     
     // An object that manages the app's photo capture behavior.
     private let photoCapture = PhotoCapture()
@@ -41,16 +38,11 @@ actor CaptureService {
     private var controlsMap: [String: [AVCaptureControl]] = [:]
     
     // A serial dispatch queue to use for capture control actions.
-    private let sessionQueue = DispatchSerialQueue(label: "com.example.apple-samplecode.AVCam.sessionQueue")
+    private let sessionQueue = DispatchSerialQueue(label: "com.melikyan.CameraView")
     
     // Sets the session queue as the actor's executor.
     nonisolated var unownedExecutor: UnownedSerialExecutor {
         sessionQueue.asUnownedSerialExecutor()
-    }
-    
-    init() {
-        // Create a source object to connect the preview view with the capture session.
-        previewSource = DefaultPreviewSource(session: captureSession)
     }
     
     // MARK: - Authorization
