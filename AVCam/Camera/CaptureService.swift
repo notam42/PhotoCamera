@@ -208,24 +208,6 @@ actor CaptureService {
         return controls
     }
     
-    // MARK: - Capture mode selection
-    
-    /// Changes the mode of capture, which can be `photo` or `video`.
-    ///
-    /// - Parameter `captureMode`: The capture mode to enable.
-    @available(*, deprecated)
-    func setCaptureMode() throws {
-        // Change the configuration atomically.
-        captureSession.beginConfiguration()
-        defer { captureSession.commitConfiguration() }
-
-        // The app needs to remove the movie capture output to perform Live Photo capture.
-        captureSession.sessionPreset = .photo
-
-        // Update the advertised capabilities after reconfiguration.
-        updateCaptureCapabilities()
-    }
-    
     // MARK: - Device selection
     
     /// Changes the capture device that provides video input.

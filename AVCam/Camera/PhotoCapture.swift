@@ -20,9 +20,6 @@ final class PhotoCapture {
     
     /// The capture output type for this service.
     let output = AVCapturePhotoOutput()
-    
-    // An internal alias for the output.
-    private var photoOutput: AVCapturePhotoOutput { output }
 
     // MARK: - Capture a photo.
     
@@ -38,7 +35,7 @@ final class PhotoCapture {
             monitorProgress(of: delegate)
             
             // Capture a new photo with the specified settings.
-            photoOutput.capturePhoto(with: photoSettings, delegate: delegate)
+            output.capturePhoto(with: photoSettings, delegate: delegate)
         }
     }
     
@@ -50,7 +47,7 @@ final class PhotoCapture {
         var photoSettings = AVCapturePhotoSettings()
         
         // Capture photos in HEIF format when the device supports it.
-        if photoOutput.availablePhotoCodecTypes.contains(.hevc) {
+        if output.availablePhotoCodecTypes.contains(.hevc) {
             photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
         }
         
@@ -63,7 +60,7 @@ final class PhotoCapture {
         // Set the largest dimensions that the photo output supports.
         // `CaptureService` automatically updates the photo output's `maxPhotoDimensions`
         // when the capture pipeline changes.
-        photoSettings.maxPhotoDimensions = photoOutput.maxPhotoDimensions
+        photoSettings.maxPhotoDimensions = output.maxPhotoDimensions
 
         return photoSettings
     }
@@ -90,10 +87,10 @@ final class PhotoCapture {
     ///
     func updateConfiguration(for device: AVCaptureDevice) {
         // Enable all supported features.
-        photoOutput.maxPhotoDimensions = device.activeFormat.supportedMaxPhotoDimensions.last ?? CMVideoDimensions()
-        photoOutput.maxPhotoQualityPrioritization = .quality
-        photoOutput.isResponsiveCaptureEnabled = photoOutput.isResponsiveCaptureSupported
-        photoOutput.isFastCapturePrioritizationEnabled = photoOutput.isFastCapturePrioritizationSupported
+        output.maxPhotoDimensions = device.activeFormat.supportedMaxPhotoDimensions.last ?? CMVideoDimensions()
+        output.maxPhotoQualityPrioritization = .quality
+        output.isResponsiveCaptureEnabled = output.isResponsiveCaptureSupported
+        output.isFastCapturePrioritizationEnabled = output.isFastCapturePrioritizationSupported
     }
 
     // MARK: - rotation
