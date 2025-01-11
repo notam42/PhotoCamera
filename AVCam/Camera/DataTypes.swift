@@ -42,7 +42,6 @@ enum CaptureActivity {
 /// A structure that represents a captured photo.
 struct Photo: Sendable {
     let data: Data
-    let isProxy: Bool
 }
 
 enum CameraError: Error {

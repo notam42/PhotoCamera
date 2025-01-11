@@ -91,11 +91,9 @@ final class PhotoCapture {
     func updateConfiguration(for device: AVCaptureDevice) {
         // Enable all supported features.
         photoOutput.maxPhotoDimensions = device.activeFormat.supportedMaxPhotoDimensions.last ?? CMVideoDimensions()
-        photoOutput.isLivePhotoCaptureEnabled = photoOutput.isLivePhotoCaptureSupported
         photoOutput.maxPhotoQualityPrioritization = .quality
         photoOutput.isResponsiveCaptureEnabled = photoOutput.isResponsiveCaptureSupported
         photoOutput.isFastCapturePrioritizationEnabled = photoOutput.isFastCapturePrioritizationSupported
-        photoOutput.isAutoDeferredPhotoDeliveryEnabled = photoOutput.isAutoDeferredPhotoDeliverySupported
     }
 
     // MARK: - rotation
@@ -116,10 +114,7 @@ typealias PhotoContinuation = CheckedContinuation<Photo, Error>
 private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
     
     private let continuation: PhotoContinuation
-    
-    private var isLivePhoto = false
-    private var isProxyPhoto = false
-    
+
     private var photoData: Data?
 
     /// A stream of capture activity values that indicate the current state of progress.
@@ -136,7 +131,6 @@ private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
     }
     
     func photoOutput(_ output: AVCapturePhotoOutput, willBeginCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
-        // Determine if this is a live capture.
         activityContinuation.yield(.photoCapture())
     }
     
@@ -144,22 +138,7 @@ private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
         // Signal that a capture is beginning.
         activityContinuation.yield(.photoCapture(willCapture: true))
     }
-    
-    func photoOutput(_ output: AVCapturePhotoOutput, didFinishRecordingLivePhotoMovieForEventualFileAt outputFileURL: URL, resolvedSettings: AVCaptureResolvedPhotoSettings) {
-        // Indicates that Live Photo capture is over.
-        activityContinuation.yield(.photoCapture())
-    }
 
-    func photoOutput(_ output: AVCapturePhotoOutput, didFinishCapturingDeferredPhotoProxy deferredPhotoProxy: AVCaptureDeferredPhotoProxy?, error: Error?) {
-        if let error = error {
-            logger.debug("Error capturing deferred photo: \(error)")
-            return
-        }
-        // Capture the data for this photo.
-        photoData = deferredPhotoProxy?.fileDataRepresentation()
-        isProxyPhoto = true
-    }
-    
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         if let error = error {
             logger.debug("Error capturing photo: \(String(describing: error))")
@@ -188,7 +167,7 @@ private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
         }
         
         /// Create a photo object to save to the `MediaLibrary`.
-        let photo = Photo(data: photoData, isProxy: isProxyPhoto)
+        let photo = Photo(data: photoData)
         // Resume the continuation by returning the captured photo.
         continuation.resume(returning: photo)
     }
