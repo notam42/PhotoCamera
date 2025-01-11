@@ -13,7 +13,7 @@ enum PhotoCaptureError: Error {
 }
 
 /// An object that manages a photo capture output to perform take photographs.
-final class PhotoCapture: OutputService {
+final class PhotoCapture {
     
     /// A value that indicates the current state of photo capture.
     @Published private(set) var captureActivity: CaptureActivity = .idle
@@ -96,6 +96,13 @@ final class PhotoCapture: OutputService {
         photoOutput.isResponsiveCaptureEnabled = photoOutput.isResponsiveCaptureSupported
         photoOutput.isFastCapturePrioritizationEnabled = photoOutput.isFastCapturePrioritizationSupported
         photoOutput.isAutoDeferredPhotoDeliveryEnabled = photoOutput.isAutoDeferredPhotoDeliverySupported
+    }
+
+    // MARK: - rotation
+
+    func setVideoRotationAngle(_ angle: CGFloat) {
+        // Set the rotation angle on the output object's video connection.
+        output.connection(with: .video)?.videoRotationAngle = angle
     }
 }
 

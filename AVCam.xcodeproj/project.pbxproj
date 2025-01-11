@@ -176,10 +176,10 @@
 		C4F82C9B285ADDA2005D427A /* AVCam */ = {
 			isa = PBXGroup;
 			children = (
-				C4F82C9C285ADDA2005D427A /* AVCamApp.swift */,
 				C48091832BD584AD00753C4A /* CameraModel.swift */,
 				C4F82CCB285AE206005D427A /* CaptureService.swift */,
 				C4E15AAE2898620E00827683 /* CameraView.swift */,
+				C4F82C9C285ADDA2005D427A /* AVCamApp.swift */,
 				C47390512BC3464500EC7B9D /* Capture */,
 				C470F0EF2899E2FB004D4515 /* Model */,
 				C472D847285BD4A40082244A /* Views */,
