@@ -61,7 +61,6 @@
 
 /* Begin PBXFileReference section */
 		4171C532FBB2053E055D7336 /* SampleCode.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
-		7710E8B4E5AEBAFE7C73EBAA /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B92404E334D9008D3705950F /* LICENSE.txt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		C400F45E28DFD8AC00861093 /* ThumbnailButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThumbnailButton.swift; sourceTree = "<group>"; };
 		C400F46228DFDAB700861093 /* FoundationExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationExtensions.swift; sourceTree = "<group>"; };
@@ -214,7 +213,6 @@
 		C4F82C90285ADDA2005D427A = {
 			isa = PBXGroup;
 			children = (
-				7710E8B4E5AEBAFE7C73EBAA /* README.md */,
 				C4F82C9B285ADDA2005D427A /* AVCam */,
 				C4C6E1FB2CA1CF250081A8EA /* Frameworks */,
 				C4F82C9A285ADDA2005D427A /* Products */,
