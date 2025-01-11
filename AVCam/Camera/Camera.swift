@@ -9,6 +9,7 @@ import SwiftUI
 
 /// An object that provides the interface to the features of the camera.
 ///
+@Observable
 @MainActor
 final class Camera {
     
@@ -83,6 +84,7 @@ final class Camera {
     func capturePhoto() async {
         guard !Self.isPreview else { return }
         logger.info("Photo captured")
+        let _ = try? await captureService.capturePhoto()
         // TODO:
     }
 
