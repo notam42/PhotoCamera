@@ -6,7 +6,6 @@ An object that retrieves camera and microphone devices.
 */
 
 import AVFoundation
-import Combine
 
 /// An object that retrieves camera and microphone devices.
 final class DeviceLookup {

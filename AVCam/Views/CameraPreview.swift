@@ -10,12 +10,8 @@ import SwiftUI
 
 struct CameraPreview: UIViewRepresentable {
     
-    private let source: PreviewSource
-    
-    init(source: PreviewSource) {
-        self.source = source
-    }
-    
+    let source: PreviewSource
+
     func makeUIView(context: Context) -> PreviewView {
         let preview = PreviewView()
         // Connect the preview layer to the capture session.
