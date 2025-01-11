@@ -16,9 +16,7 @@ actor CaptureService {
     @Published private(set) var captureActivity: CaptureActivity = .idle
     /// A Boolean value that indicates whether a higher priority event, like receiving a phone call, interrupts the app.
     @Published private(set) var isInterrupted = false
-    /// A Boolean value that indicates whether capture controls are in a fullscreen appearance.
-    @Published var isShowingFullscreenControls = false
-    
+
     /// A type that connects a preview destination with the capture session.
     nonisolated let previewSource: PreviewSource
     
@@ -40,10 +38,7 @@ actor CaptureService {
     
     // A Boolean value that indicates whether the actor finished its required configuration.
     private var isSetUp = false
-    
-    // A delegate object that responds to capture control activation and presentation events.
-    private var controlsDelegate = CaptureControlsDelegate()
-    
+
     // A map that stores capture controls by device identifier.
     private var controlsMap: [String: [AVCaptureControl]] = [:]
     
@@ -96,8 +91,7 @@ actor CaptureService {
         // Observe internal state and notifications.
         observeOutputServices()
         observeNotifications()
-        observeCaptureControlsState()
-        
+
         do {
             // Retrieve the default camera
             let defaultCamera = try deviceLookup.defaultCamera
@@ -177,9 +171,6 @@ actor CaptureService {
                 logger.info("Unable to add control \(control).")
             }
         }
-        
-        // Set the controls delegate.
-        captureSession.setControlsDelegate(controlsDelegate, queue: sessionQueue)
         
         // Commit the capture session configuration.
         captureSession.commitConfiguration()
@@ -424,13 +415,7 @@ actor CaptureService {
     private func observeOutputServices() {
         photoCapture.$captureActivity.assign(to: &$captureActivity)
     }
-    
-    /// Observe when capture control enter and exit a fullscreen appearance.
-    private func observeCaptureControlsState() {
-        controlsDelegate.$isShowingFullscreenControls
-            .assign(to: &$isShowingFullscreenControls)
-    }
-    
+
     /// Observe capture-related notifications.
     private func observeNotifications() {
         Task {
@@ -460,28 +445,5 @@ actor CaptureService {
                 }
             }
         }
-    }
-}
-
-class CaptureControlsDelegate: NSObject, AVCaptureSessionControlsDelegate {
-    
-    @Published private(set) var isShowingFullscreenControls = false
-
-    func sessionControlsDidBecomeActive(_ session: AVCaptureSession) {
-        logger.debug("Capture controls active.")
-    }
-
-    func sessionControlsWillEnterFullscreenAppearance(_ session: AVCaptureSession) {
-        isShowingFullscreenControls = true
-        logger.debug("Capture controls will enter fullscreen appearance.")
-    }
-    
-    func sessionControlsWillExitFullscreenAppearance(_ session: AVCaptureSession) {
-        isShowingFullscreenControls = false
-        logger.debug("Capture controls will exit fullscreen appearance.")
-    }
-    
-    func sessionControlsDidBecomeInactive(_ session: AVCaptureSession) {
-        logger.debug("Capture controls inactive.")
     }
 }

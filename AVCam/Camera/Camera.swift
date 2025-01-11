@@ -20,10 +20,7 @@ final class Camera {
     
     /// A Boolean value that indicates whether the app is currently switching video devices.
     private(set) var isSwitchingVideoDevices = false
-    
-    /// A Boolean value that indicates whether the camera prefers showing a minimized set of UI controls.
-    private(set) var prefersMinimizedUI = false
-    
+
     /// A Boolean value that indicates whether the app is currently switching capture modes.
     private(set) var isSwitchingModes = false
     
@@ -116,16 +113,6 @@ final class Camera {
                 } else {
                     // Forward the activity to the UI.
                     captureActivity = activity
-                }
-            }
-        }
-        
-        Task {
-            // Await updates to a person's interaction with the Camera Control HUD.
-            for await isShowingFullscreenControls in await captureService.$isShowingFullscreenControls.values {
-                withAnimation {
-                    // Prefer showing a minimized UI when capture controls enter a fullscreen appearance.
-                    prefersMinimizedUI = isShowingFullscreenControls
                 }
             }
         }
