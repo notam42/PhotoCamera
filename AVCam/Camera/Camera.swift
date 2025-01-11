@@ -25,9 +25,6 @@ final class Camera {
     /// A Boolean value that indicates whether to show visual feedback when capture begins.
     private(set) var shouldFlashScreen = false
     
-    /// A thumbnail for the last captured photo or video.
-    private(set) var thumbnail: CGImage?
-    
     /// An error that indicates the details of an error during photo or movie capture.
     private(set) var error: Error?
     

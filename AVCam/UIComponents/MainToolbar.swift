@@ -18,7 +18,7 @@ struct MainToolbar: PlatformView {
     
     var body: some View {
         HStack {
-			ThumbnailButton(camera: camera)
+			PhotoPickerButton()
             Spacer()
             CaptureButton(camera: camera)
             Spacer()
@@ -33,6 +33,20 @@ struct MainToolbar: PlatformView {
     var width: CGFloat? { isRegularSize ? 250 : nil }
     var height: CGFloat? { 80 }
 }
+
+private struct PhotoPickerButton: View {
+
+    @State private var selectedItems: [PhotosPickerItem] = []
+
+    var body: some View {
+        PhotosPicker( selection: $selectedItems, matching: .images, photoLibrary: .shared()) {
+            Image(systemName: "photo.on.rectangle")
+        }
+        .frame(width: 64.0, height: 64.0)
+        .cornerRadius(8)
+    }
+}
+
 
 #Preview {
     Group {

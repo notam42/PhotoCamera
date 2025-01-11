@@ -22,17 +22,13 @@ struct CaptureButton: View {
     }
     
     @ViewBuilder
-    var captureButton: some View {
+    private var captureButton: some View {
         PhotoCaptureButton {
             Task {
                 await camera.capturePhoto()
             }
         }
     }
-}
-
-#Preview("Photo") {
-    CaptureButton(camera: Camera())
 }
 
 private struct PhotoCaptureButton: View {
@@ -107,4 +103,8 @@ private struct MovieCaptureButton: View {
             configuration.label
         }
     }
+}
+
+#Preview("Photo") {
+    CaptureButton(camera: Camera())
 }
