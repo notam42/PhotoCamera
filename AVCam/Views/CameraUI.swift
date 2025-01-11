@@ -24,10 +24,6 @@ struct CameraUI<CameraModel: Camera>: PlatformView {
                 compactUI
             }
         }
-        .overlay(alignment: .top) {
-            LiveBadge()
-                .opacity(camera.captureActivity.isLivePhoto ? 1.0 : 0.0)
-        }
         .overlay {
             StatusOverlayView(status: camera.status)
         }

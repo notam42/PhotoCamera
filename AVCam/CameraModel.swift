@@ -86,7 +86,6 @@ final class CameraModel: Camera {
     func syncState() async {
         cameraState = await CameraState.current
         qualityPrioritization = cameraState.qualityPrioritization
-        isLivePhotoEnabled = cameraState.isLivePhotoEnabled
     }
     
     // MARK: - Changing devices
@@ -103,19 +102,11 @@ final class CameraModel: Camera {
     /// Captures a photo and writes it to the user's Photos library.
     func capturePhoto() async {
         do {
-            let photoFeatures = PhotoFeatures(isLivePhotoEnabled: isLivePhotoEnabled, qualityPrioritization: qualityPrioritization)
+            let photoFeatures = PhotoFeatures(qualityPrioritization: qualityPrioritization)
             let photo = try await captureService.capturePhoto(with: photoFeatures)
             try await mediaLibrary.save(photo: photo)
         } catch {
             self.error = error
-        }
-    }
-    
-    /// A Boolean value that indicates whether to capture Live Photos when capturing stills.
-    var isLivePhotoEnabled = true {
-        didSet {
-            // Update the persistent state value.
-            cameraState.isLivePhotoEnabled = isLivePhotoEnabled
         }
     }
     

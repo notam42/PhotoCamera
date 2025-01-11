@@ -11,7 +11,6 @@ import SwiftUI
 @Observable
 class PreviewCameraModel: Camera {
     
-    var isLivePhotoEnabled = true
     var prefersMinimizedUI = false
     var qualityPrioritization = QualityPrioritization.quality
     var shouldFlashScreen = false
@@ -59,10 +58,6 @@ class PreviewCameraModel: Camera {
     }
     
     var recordingTime: TimeInterval { .zero }
-    
-    private var capabilities: CaptureCapabilities {
-        CaptureCapabilities(isLivePhotoCaptureSupported: true)
-    }
     
     func syncState() async {
         logger.debug("Syncing state isn't implemented in PreviewCamera.")

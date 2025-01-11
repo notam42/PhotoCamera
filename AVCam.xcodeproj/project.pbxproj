@@ -23,7 +23,6 @@
 		C4DCF51428947AFA00805EE2 /* PreviewCameraModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DCF51328947AFA00805EE2 /* PreviewCameraModel.swift */; };
 		C4DFD84428C3E173005B74F0 /* DataTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DFD84328C3E173005B74F0 /* DataTypes.swift */; };
 		C4DFD84628C3ED3D005B74F0 /* StatusOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DFD84528C3ED3D005B74F0 /* StatusOverlayView.swift */; };
-		C4DFD84828C5665E005B74F0 /* LiveBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DFD84728C5665E005B74F0 /* LiveBadge.swift */; };
 		C4E15AAF2898620E00827683 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E15AAE2898620E00827683 /* CameraView.swift */; };
 		C4E15AB12898660900827683 /* PhotoCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E15AB02898660900827683 /* PhotoCapture.swift */; };
 		C4EA0DC32891F2F80085A584 /* CaptureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4EA0DC22891F2F80085A584 /* CaptureExtensions.swift */; };
@@ -79,7 +78,6 @@
 		C4DCF51328947AFA00805EE2 /* PreviewCameraModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewCameraModel.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4DFD84328C3E173005B74F0 /* DataTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataTypes.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4DFD84528C3ED3D005B74F0 /* StatusOverlayView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusOverlayView.swift; sourceTree = "<group>"; };
-		C4DFD84728C5665E005B74F0 /* LiveBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveBadge.swift; sourceTree = "<group>"; };
 		C4E15AAE2898620E00827683 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4E15AB02898660900827683 /* PhotoCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCapture.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4EA0DC22891F2F80085A584 /* CaptureExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureExtensions.swift; sourceTree = "<group>"; };
@@ -124,7 +122,6 @@
 		C400F46528DFDDD800861093 /* Overlays */ = {
 			isa = PBXGroup;
 			children = (
-				C4DFD84728C5665E005B74F0 /* LiveBadge.swift */,
 				C4DFD84528C3ED3D005B74F0 /* StatusOverlayView.swift */,
 			);
 			path = Overlays;
@@ -351,7 +348,6 @@
 				C472D84F285BDFA60082244A /* MainToolbar.swift in Sources */,
 				C4A73CA12CC0748800C2FA84 /* CameraState.swift in Sources */,
 				C4C6E2112CA1CF860081A8EA /* AVCamCaptureIntent.swift in Sources */,
-				C4DFD84828C5665E005B74F0 /* LiveBadge.swift in Sources */,
 				C400F46128DFD8AC00861093 /* ThumbnailButton.swift in Sources */,
 				C4E15AAF2898620E00827683 /* CameraView.swift in Sources */,
 				C442A31128BEAEA70029B42B /* MediaLibrary.swift in Sources */,

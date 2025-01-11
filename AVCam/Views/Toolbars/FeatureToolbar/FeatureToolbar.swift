@@ -18,7 +18,6 @@ struct FeaturesToolbar<CameraModel: Camera>: PlatformView {
     var body: some View {
         HStack(spacing: 30) {
             Spacer()
-            livePhotoButton
             prioritizePicker
         }
         .buttonStyle(DefaultButtonStyle(size: isRegularSize ? .large : .small))
@@ -26,16 +25,7 @@ struct FeaturesToolbar<CameraModel: Camera>: PlatformView {
         // Hide the toolbar items when a person interacts with capture controls.
         .opacity(camera.prefersMinimizedUI ? 0 : 1)
     }
-    
-    //  A button to toggle the enabled state of Live Photo capture.
-    var livePhotoButton: some View {
-        Button {
-            camera.isLivePhotoEnabled.toggle()
-        } label: {
-            Image(systemName: camera.isLivePhotoEnabled ? "livephoto" : "livephoto.slash")
-        }
-    }
-    
+
     @ViewBuilder
     var prioritizePicker: some View {
         Menu {

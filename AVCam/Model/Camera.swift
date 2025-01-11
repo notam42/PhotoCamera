@@ -41,9 +41,6 @@ protocol Camera: AnyObject {
     /// Performs a one-time automatic focus and exposure operation.
     func focusAndExpose(at point: CGPoint) async
     
-    /// A Boolean value that indicates whether to capture Live Photos when capturing stills.
-    var isLivePhotoEnabled: Bool { get set }
-    
     /// A value that indicates how to balance the photo capture quality versus speed.
     var qualityPrioritization: QualityPrioritization { get set }
     

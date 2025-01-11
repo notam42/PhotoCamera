@@ -10,10 +10,6 @@ import Foundation
 
 struct CameraState: Codable {
     
-    var isLivePhotoEnabled = true {
-        didSet { save() }
-    }
-    
     var qualityPrioritization = QualityPrioritization.quality {
         didSet { save() }
     }

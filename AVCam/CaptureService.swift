@@ -15,8 +15,6 @@ actor CaptureService {
     
     /// A value that indicates whether the capture service is idle or capturing a photo or movie.
     @Published private(set) var captureActivity: CaptureActivity = .idle
-    /// A value that indicates the current capture capabilities of the service.
-    @Published private(set) var captureCapabilities = CaptureCapabilities.unknown
     /// A Boolean value that indicates whether a higher priority event, like receiving a phone call, interrupts the app.
     @Published private(set) var isInterrupted = false
     /// A Boolean value that indicates whether capture controls are in a fullscreen appearance.
@@ -422,8 +420,6 @@ actor CaptureService {
     private func updateCaptureCapabilities() {
         // Update the output service configuration.
         photoCapture.updateConfiguration(for: currentDevice)
-        // Set the capture service's capabilities for the selected mode.
-        captureCapabilities = photoCapture.capabilities
     }
     
     /// Merge the `captureActivity` values of the photo and movie capture services,

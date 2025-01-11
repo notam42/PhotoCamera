@@ -60,27 +60,7 @@ actor MediaLibrary {
             // Specify the appropriate resource type for the photo.
             creationRequest.addResource(with: photo.isProxy ? .photoProxy : .photo, data: photo.data, options: options)
             creationRequest.location = location
-            
-            // Save Live Photo data.
-            if let url = photo.livePhotoMovieURL {
-                let livePhotoOptions = PHAssetResourceCreationOptions()
-                livePhotoOptions.shouldMoveFile = true
-                creationRequest.addResource(with: .pairedVideo, fileURL: url, options: livePhotoOptions)
-            }
-            
-            return creationRequest.placeholderForCreatedAsset
-        }
-    }
-    
-    /// Saves a movie to the Photos library.
-    func save(movie: Movie) async throws {
-        let location = try await currentLocation
-        try await performChange {
-            let options = PHAssetResourceCreationOptions()
-            options.shouldMoveFile = true
-            let creationRequest = PHAssetCreationRequest.forAsset()
-            creationRequest.addResource(with: .video, fileURL: movie.url, options: options)
-            creationRequest.location = location
+
             return creationRequest.placeholderForCreatedAsset
         }
     }
