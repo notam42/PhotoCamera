@@ -106,6 +106,7 @@
 				C400F45E28DFD8AC00861093 /* ThumbnailButton.swift */,
 				C4A349DE28BD4B700056FAAF /* SwitchCameraButton.swift */,
 				C4DFD84528C3ED3D005B74F0 /* StatusOverlayView.swift */,
+				C451840F289C5FD700B35C89 /* ViewExtensions.swift */,
 			);
 			path = UIComponents;
 			sourceTree = "<group>";
@@ -146,14 +147,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		C4EA0DC12891F2D60085A584 /* Support */ = {
-			isa = PBXGroup;
-			children = (
-				C451840F289C5FD700B35C89 /* ViewExtensions.swift */,
-			);
-			path = Support;
-			sourceTree = "<group>";
-		};
 		C4F82C90285ADDA2005D427A = {
 			isa = PBXGroup;
 			children = (
@@ -176,15 +169,14 @@
 		C4F82C9B285ADDA2005D427A /* AVCam */ = {
 			isa = PBXGroup;
 			children = (
-				C48091832BD584AD00753C4A /* CameraModel.swift */,
-				C4F82CCB285AE206005D427A /* CaptureService.swift */,
-				C4E15AAE2898620E00827683 /* CameraView.swift */,
-				C4F82C9C285ADDA2005D427A /* AVCamApp.swift */,
 				C47390512BC3464500EC7B9D /* Capture */,
 				C470F0EF2899E2FB004D4515 /* Model */,
 				C472D847285BD4A40082244A /* Views */,
 				C400F46428DFDD4800861093 /* UIComponents */,
-				C4EA0DC12891F2D60085A584 /* Support */,
+				C48091832BD584AD00753C4A /* CameraModel.swift */,
+				C4F82CCB285AE206005D427A /* CaptureService.swift */,
+				C4E15AAE2898620E00827683 /* CameraView.swift */,
+				C4F82C9C285ADDA2005D427A /* AVCamApp.swift */,
 				C4F82CA0285ADDA3005D427A /* Assets.xcassets */,
 				C4F82CA3285ADDA3005D427A /* Preview Content */,
 			);
