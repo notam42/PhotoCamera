@@ -375,8 +375,8 @@ actor CaptureService {
     }
     
     // MARK: - Photo capture
-    func capturePhoto() async throws -> Data {
-        try await photoCapture.capturePhoto()
+    func capturePhoto() {
+        photoCapture.capturePhoto()
     }
 
     // MARK: - Internal state management

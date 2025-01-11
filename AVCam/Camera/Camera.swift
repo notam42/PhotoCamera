@@ -21,10 +21,7 @@ final class Camera {
 
     /// A Boolean value that indicates whether the app is currently switching capture modes.
     private(set) var isSwitchingModes = false
-    
-    /// A Boolean value that indicates whether to show visual feedback when capture begins.
-    private(set) var shouldFlashScreen = false
-    
+
     /// An error that indicates the details of an error during photo or movie capture.
     private(set) var error: Error?
     
@@ -54,7 +51,6 @@ final class Camera {
         do {
             // Start the capture service to start the flow of data.
             try await captureService.start()
-            observeState()
             status = .running
         } catch {
             logger.error("Failed to start capture service. \(error)")
@@ -77,38 +73,14 @@ final class Camera {
     /// Captures a photo and writes it to the user's Photos library.
     func capturePhoto() async {
         guard !Self.isPreview else { return }
+        await captureService.capturePhoto()
         logger.info("Photo captured")
-        let _ = try? await captureService.capturePhoto()
-        // TODO:
     }
 
     /// Performs a focus and expose operation at the specified screen point.
     func focusAndExpose(at point: CGPoint) async {
         guard !Self.isPreview else { return }
         await captureService.focusAndExpose(at: point)
-    }
-    
-    /// Sets the `showCaptureFeedback` state to indicate that capture is underway.
-    private func flashScreen() {
-        shouldFlashScreen = true
-        withAnimation(.linear(duration: 0.01)) {
-            shouldFlashScreen = false
-        }
-    }
-
-    // MARK: - Internal state observations
-    
-    // Set up camera's state observations.
-    private func observeState() {
-        Task {
-            // Await new capture activity values from the capture service.
-            for await activity in await captureService.$captureActivity.values {
-                if case .willCapture = activity {
-                    // Flash the screen to indicate capture is starting.
-                    flashScreen()
-                }
-            }
-        }
     }
 
     private static let isPreview: Bool = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"

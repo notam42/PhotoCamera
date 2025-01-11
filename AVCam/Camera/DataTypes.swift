@@ -27,6 +27,7 @@ enum CameraStatus {
 enum CaptureActivity {
     case idle
     case willCapture
+    case didCapture(data: Data?)
 }
 
 enum CameraError: Error {

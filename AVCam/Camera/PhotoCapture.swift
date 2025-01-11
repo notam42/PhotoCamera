@@ -8,9 +8,6 @@ An object that manages a photo capture output to take photographs.
 import AVFoundation
 import CoreImage
 
-enum PhotoCaptureError: Error {
-    case noPhotoData
-}
 
 /// An object that manages a photo capture output to perform take photographs.
 final class PhotoCapture {
@@ -24,19 +21,16 @@ final class PhotoCapture {
     // MARK: - Capture a photo.
     
     /// The app calls this method when the user taps the photo capture button.
-    func capturePhoto() async throws -> Data {
+    func capturePhoto() {
         // Wrap the delegate-based capture API in a continuation to use it in an async context.
-        try await withCheckedThrowingContinuation { continuation in
-            
-            // Create a settings object to configure the photo capture.
-            let photoSettings = createPhotoSettings()
-            
-            let delegate = PhotoCaptureDelegate(continuation: continuation)
-            monitorProgress(of: delegate)
-            
-            // Capture a new photo with the specified settings.
-            output.capturePhoto(with: photoSettings, delegate: delegate)
-        }
+        // Create a settings object to configure the photo capture.
+        let photoSettings = createPhotoSettings()
+
+        let delegate = PhotoCaptureDelegate()
+        monitorProgress(of: delegate)
+
+        // Capture a new photo with the specified settings.
+        output.capturePhoto(with: photoSettings, delegate: delegate)
     }
     
     // MARK: - Create a photo settings object.
@@ -101,7 +95,7 @@ final class PhotoCapture {
     }
 }
 
-typealias PhotoContinuation = CheckedContinuation<Data, Error>
+typealias PhotoContinuation = CheckedContinuation<Void, Error>
 
 // MARK: - A photo capture delegate to process the captured photo.
 
@@ -109,8 +103,6 @@ typealias PhotoContinuation = CheckedContinuation<Data, Error>
 ///
 /// The delegate produces a stream of events that indicate its current state of processing.
 private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
-    
-    private let continuation: PhotoContinuation
 
     private var photoData: Data?
 
@@ -119,9 +111,7 @@ private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
     private let activityContinuation: AsyncStream<CaptureActivity>.Continuation
     
     /// Creates a new delegate object with the checked continuation to call when processing is complete.
-    init(continuation: PhotoContinuation) {
-        self.continuation = continuation
-        
+    override init() {
         let (activityStream, activityContinuation) = AsyncStream.makeStream(of: CaptureActivity.self)
         self.activityStream = activityStream
         self.activityContinuation = activityContinuation
@@ -141,25 +131,10 @@ private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
     }
     
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
-
-        defer {
-            /// Finish the continuation to terminate the activity stream.
-            activityContinuation.finish()
-        }
-
-        // If an error occurs, resume the continuation by throwing an error, and return.
         if let error {
-            continuation.resume(throwing: error)
-            return
+            logger.error("Capture error: \(error.localizedDescription)")
         }
-        
-        // If the app captures no photo data, resume the continuation by throwing an error, and return.
-        guard let photoData else {
-            continuation.resume(throwing: PhotoCaptureError.noPhotoData)
-            return
-        }
-        
-        // Resume the continuation by returning the captured photo.
-        continuation.resume(returning: photoData)
+        activityContinuation.yield(.didCapture(data: photoData))
+        activityContinuation.finish()
     }
 }
