@@ -46,9 +46,6 @@ final class CameraModel: Camera {
     /// An object that provides the connection between the capture session and the video preview layer.
     var previewSource: PreviewSource { captureService.previewSource }
     
-    /// An object that saves captured media to a person's Photos library.
-    private let mediaLibrary = MediaLibrary()
-    
     /// An object that manages the app's capture functionality.
     private let captureService = CaptureService()
 
@@ -88,12 +85,7 @@ final class CameraModel: Camera {
     
     /// Captures a photo and writes it to the user's Photos library.
     func capturePhoto() async {
-        do {
-            let photo = try await captureService.capturePhoto()
-            try await mediaLibrary.save(photo: photo)
-        } catch {
-            self.error = error
-        }
+        // TODO:
     }
 
     /// Performs a focus and expose operation at the specified screen point.
@@ -113,13 +105,6 @@ final class CameraModel: Camera {
     
     // Set up camera's state observations.
     private func observeState() {
-        Task {
-            // Await new thumbnails that the media library generates when saving a file.
-            for await thumbnail in mediaLibrary.thumbnails.compactMap({ $0 }) {
-                self.thumbnail = thumbnail
-            }
-        }
-        
         Task {
             // Await new capture activity values from the capture service.
             for await activity in await captureService.$captureActivity.values {

@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		C400F46128DFD8AC00861093 /* ThumbnailButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C400F45E28DFD8AC00861093 /* ThumbnailButton.swift */; };
-		C442A31128BEAEA70029B42B /* MediaLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C442A31028BEAEA70029B42B /* MediaLibrary.swift */; };
 		C44DC7BE289AC3DD0099BB87 /* PreviewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C44DC7BD289AC3DD0099BB87 /* PreviewContainer.swift */; };
 		C4518410289C5FD700B35C89 /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C451840F289C5FD700B35C89 /* ViewExtensions.swift */; };
 		C472D846285BBFA60082244A /* DeviceLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = C472D845285BBFA60082244A /* DeviceLookup.swift */; };
@@ -57,7 +56,6 @@
 		4171C532FBB2053E055D7336 /* SampleCode.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
 		B92404E334D9008D3705950F /* LICENSE.txt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		C400F45E28DFD8AC00861093 /* ThumbnailButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThumbnailButton.swift; sourceTree = "<group>"; };
-		C442A31028BEAEA70029B42B /* MediaLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaLibrary.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C44DC7BD289AC3DD0099BB87 /* PreviewContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewContainer.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C451840F289C5FD700B35C89 /* ViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
 		C472D845285BBFA60082244A /* DeviceLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceLookup.swift; sourceTree = "<group>"; usesTabs = 0; };
@@ -117,7 +115,6 @@
 			children = (
 				C4F82CC9285AE13B005D427A /* Camera.swift */,
 				C4DFD84328C3E173005B74F0 /* DataTypes.swift */,
-				C442A31028BEAEA70029B42B /* MediaLibrary.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -298,7 +295,6 @@
 				C472D84F285BDFA60082244A /* MainToolbar.swift in Sources */,
 				C400F46128DFD8AC00861093 /* ThumbnailButton.swift in Sources */,
 				C4E15AAF2898620E00827683 /* CameraView.swift in Sources */,
-				C442A31128BEAEA70029B42B /* MediaLibrary.swift in Sources */,
 				C4CB95D02BF06EA6000CF8C7 /* CameraUI.swift in Sources */,
 				C4DFD84428C3E173005B74F0 /* DataTypes.swift in Sources */,
 				C472D846285BBFA60082244A /* DeviceLookup.swift in Sources */,
