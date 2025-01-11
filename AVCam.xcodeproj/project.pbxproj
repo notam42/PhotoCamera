@@ -107,14 +107,6 @@
 			path = UIComponents;
 			sourceTree = "<group>";
 		};
-		C470F0EF2899E2FB004D4515 /* Model */ = {
-			isa = PBXGroup;
-			children = (
-				C4DFD84328C3E173005B74F0 /* DataTypes.swift */,
-			);
-			path = Model;
-			sourceTree = "<group>";
-		};
 		C472D847285BD4A40082244A /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -125,13 +117,16 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		C47390512BC3464500EC7B9D /* Capture */ = {
+		C47390512BC3464500EC7B9D /* Camera */ = {
 			isa = PBXGroup;
 			children = (
+				C4DFD84328C3E173005B74F0 /* DataTypes.swift */,
 				C4E15AB02898660900827683 /* PhotoCapture.swift */,
 				C472D845285BBFA60082244A /* DeviceLookup.swift */,
+				C4F82CCB285AE206005D427A /* CaptureService.swift */,
+				C48091832BD584AD00753C4A /* Camera.swift */,
 			);
-			path = Capture;
+			path = Camera;
 			sourceTree = "<group>";
 		};
 		C4C6E1FB2CA1CF250081A8EA /* Frameworks */ = {
@@ -164,12 +159,9 @@
 		C4F82C9B285ADDA2005D427A /* AVCam */ = {
 			isa = PBXGroup;
 			children = (
-				C47390512BC3464500EC7B9D /* Capture */,
-				C470F0EF2899E2FB004D4515 /* Model */,
+				C47390512BC3464500EC7B9D /* Camera */,
 				C472D847285BD4A40082244A /* Views */,
 				C400F46428DFDD4800861093 /* UIComponents */,
-				C48091832BD584AD00753C4A /* Camera.swift */,
-				C4F82CCB285AE206005D427A /* CaptureService.swift */,
 				C4E15AAE2898620E00827683 /* CameraView.swift */,
 				C4F82C9C285ADDA2005D427A /* AVCamApp.swift */,
 				C4F82CA0285ADDA3005D427A /* Assets.xcassets */,
