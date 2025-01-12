@@ -11,7 +11,6 @@ import UIKit
 let largeButtonSize = CGSize(width: 64, height: 64)
 let smallButtonSize = CGSize(width: 32, height: 32)
 
-@MainActor
 protocol PlatformView: View {
     var verticalSizeClass: UserInterfaceSizeClass? { get }
     var horizontalSizeClass: UserInterfaceSizeClass? { get }

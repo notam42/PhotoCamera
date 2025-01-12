@@ -36,10 +36,10 @@ struct MainToolbar: PlatformView {
 
 private struct PhotoPickerButton: View {
 
-    @State private var selectedItems: [PhotosPickerItem] = []
+    @State private var selectedItem: PhotosPickerItem?
 
     var body: some View {
-        PhotosPicker( selection: $selectedItems, matching: .images, photoLibrary: .shared()) {
+        PhotosPicker(selection: $selectedItem, matching: .images, photoLibrary: .shared()) {
             Image(systemName: "photo.on.rectangle")
         }
         .frame(width: 64.0, height: 64.0)

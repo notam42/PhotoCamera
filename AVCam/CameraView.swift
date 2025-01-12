@@ -9,7 +9,6 @@ import SwiftUI
 import AVFoundation
 import AVKit
 
-@MainActor
 struct CameraView: View {
 
     let camera: Camera
