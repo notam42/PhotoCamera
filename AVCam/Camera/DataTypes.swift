@@ -25,7 +25,6 @@ enum CameraStatus {
 ///
 /// This type provides feedback to the UI regarding the active status of the `CaptureService` actor.
 enum CaptureActivity {
-    case idle
     case willCapture
     case didCapture(data: Data?)
 }

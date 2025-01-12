@@ -22,21 +22,16 @@ struct PreviewContainer<Content: View>: View {
     
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     
-    @State var camera: Camera
-    
+    let camera: Camera
+    let content: () -> Content
+
     // State values for transition effects.
     @State private var blurRadius = CGFloat.zero
     
     // When running in photo capture mode on a compact device size, move the preview area
     // update by the offset amount so that it's better centered between the top and bottom bars.
     private let photoModeOffset = CGFloat(-44)
-    private let content: Content
-    
-    init(camera: Camera, @ViewBuilder content: () -> Content) {
-        self.camera = camera
-        self.content = content()
-    }
-    
+
     var body: some View {
         // On compact devices, show a view finder rectangle around the video preview bounds.
         if horizontalSizeClass == .compact {
@@ -56,7 +51,7 @@ struct PreviewContainer<Content: View>: View {
     
     /// Attach animations to the camera preview.
     var previewView: some View {
-        content
+        content()
             .blur(radius: blurRadius, opaque: true)
             .onChange(of: camera.isSwitchingModes, updateBlurRadius(_:_:))
             .onChange(of: camera.isSwitchingVideoDevices, updateBlurRadius(_:_:))

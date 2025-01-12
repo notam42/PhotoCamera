@@ -17,6 +17,9 @@ final class Camera {
     /// The app's capture session.
     var captureSession: AVCaptureSession { captureService.captureSession }
 
+    /// The activity stream for indicating capture stages
+    var activityStream: AsyncStream<CaptureActivity> { captureService.activityStream }
+
     /// The current status of the camera, such as unauthorized, running, or failed.
     private(set) var status = CameraStatus.unknown
 
@@ -76,7 +79,7 @@ final class Camera {
     
     // MARK: - Photo capture
     
-    /// Captures a photo and writes it to the user's Photos library.
+    /// Captures a photo
     func capturePhoto() async {
         guard !Self.isPreview else { return }
         await captureService.capturePhoto()

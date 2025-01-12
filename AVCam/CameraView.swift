@@ -10,12 +10,13 @@ import AVFoundation
 import AVKit
 
 @MainActor
-struct CameraView: PlatformView {
-    
-    @Environment(\.verticalSizeClass) var verticalSizeClass
-    @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    
-    @State var camera: Camera
+struct CameraView: View {
+
+    let camera: Camera
+
+    @State private var blink: Bool = false
+    @State private var photoData: Data?
+
 
     var body: some View {
         ZStack {
@@ -27,22 +28,38 @@ struct CameraView: PlatformView {
                     .onCameraCaptureEvent { event in
                         if event.phase == .ended {
                             Task {
-                                // Capture a photo when pressing a hardware button.
                                 await camera.capturePhoto()
                             }
                         }
                     }
+
                     // Focus and expose at the tapped point.
                     .onTapGesture { location in
                         Task { await camera.focusAndExpose(at: location) }
                     }
-                    /// The value of `shouldFlashScreen` changes briefly to `true` when capture
-                    /// starts, and then immediately changes to `false`. Use this change to
-                    /// flash the screen to provide visual feedback when capturing photos.
-//                    .opacity(camera.shouldFlashScreen ? 0 : 1)
+                    .opacity(blink ? 0 : 1)
             }
+
             // The main camera user interface.
             CameraUI(camera: camera)
+        }
+
+        .task {
+            // Start the capture pipeline.
+            await camera.start()
+            Task {
+                // Listen to capture events
+                for await activity in camera.activityStream {
+                    print("Activity: \(activity)")
+                    switch activity {
+                        case .willCapture:
+                            blink = true
+                        case .didCapture(let data):
+                            blink = false
+                            photoData = data
+                    }
+                }
+            }
         }
     }
 }

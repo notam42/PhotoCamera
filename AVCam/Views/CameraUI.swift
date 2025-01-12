@@ -11,7 +11,7 @@ import AVFoundation
 /// A view that presents the main camera user interface.
 struct CameraUI: PlatformView {
 
-    @State var camera: Camera
+    let camera: Camera
 
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @Environment(\.horizontalSizeClass) var horizontalSizeClass

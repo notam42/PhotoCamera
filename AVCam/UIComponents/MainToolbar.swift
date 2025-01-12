@@ -14,8 +14,8 @@ struct MainToolbar: PlatformView {
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     
-    @State var camera: Camera
-    
+    let camera: Camera
+
     var body: some View {
         HStack {
 			PhotoPickerButton()

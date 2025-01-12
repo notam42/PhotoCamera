@@ -10,13 +10,14 @@ import Foundation
 
 /// An actor that manages the capture pipeline, which includes the capture session, device inputs, and capture outputs.
 /// The app defines it as an `actor` type to ensure that all camera operations happen off of the `@MainActor`.
-actor CaptureService {
-    
-    /// A value that indicates whether the capture service is idle or capturing a photo or movie.
-    @Published private(set) var captureActivity: CaptureActivity = .idle
+actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
 
     /// The app's capture session.
     nonisolated let captureSession = AVCaptureSession()
+
+    /// A stream of capture activity values that indicate the current state of progress.
+    let activityStream: AsyncStream<CaptureActivity>
+    private let activityContinuation: AsyncStream<CaptureActivity>.Continuation
 
     /// Whether to use the front camera first
     let forSelfie: Bool
@@ -47,6 +48,9 @@ actor CaptureService {
 
     init(forSelfie: Bool) {
         self.forSelfie = forSelfie
+        let (activityStream, activityContinuation) = AsyncStream.makeStream(of: CaptureActivity.self)
+        self.activityStream = activityStream
+        self.activityContinuation = activityContinuation
     }
 
     // MARK: - Authorization
@@ -326,16 +330,8 @@ actor CaptureService {
         // when the capture pipeline changes.
         photoSettings.maxPhotoDimensions = output.maxPhotoDimensions
 
-        let delegate = PhotoCaptureDelegate()
-        Task {
-            // Asynchronously monitor the activity of the delegate while the system performs capture.
-            for await activity in delegate.activityStream {
-                captureActivity = activity
-            }
-        }
-
         // Capture a new photo with the specified settings.
-        output.capturePhoto(with: photoSettings, delegate: delegate)
+        output.capturePhoto(with: photoSettings, delegate: self)
     }
 
     // MARK: - Internal state management
@@ -365,47 +361,20 @@ actor CaptureService {
             }
         }
     }
-}
 
+    // MARK: - A photo capture delegate to process the captured photo.
 
-// MARK: - A photo capture delegate to process the captured photo.
-
-/// An object that adopts the `AVCapturePhotoCaptureDelegate` protocol to respond to photo capture life-cycle events.
-///
-/// The delegate produces a stream of events that indicate its current state of processing.
-class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
-
-    private var photoData: Data?
-
-    /// A stream of capture activity values that indicate the current state of progress.
-    let activityStream: AsyncStream<CaptureActivity>
-    private let activityContinuation: AsyncStream<CaptureActivity>.Continuation
-
-    /// Creates a new delegate object with the checked continuation to call when processing is complete.
-    override init() {
-        let (activityStream, activityContinuation) = AsyncStream.makeStream(of: CaptureActivity.self)
-        self.activityStream = activityStream
-        self.activityContinuation = activityContinuation
-    }
-
-    func photoOutput(_ output: AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
-        // Signal that a capture is beginning.
+    nonisolated func photoOutput(_ output: AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
+        // Signal that a capture is beginning, so that the UI can flash the screen
         activityContinuation.yield(.willCapture)
     }
 
-    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+    nonisolated func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         if let error = error {
-            logger.debug("Error capturing photo: \(String(describing: error))")
+            logger.error("Error capturing photo: \(error))")
             return
         }
-        photoData = photo.fileDataRepresentation()
-    }
-
-    func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
-        if let error {
-            logger.error("Capture error: \(error.localizedDescription)")
-        }
+        let photoData = photo.fileDataRepresentation()
         activityContinuation.yield(.didCapture(data: photoData))
-        activityContinuation.finish()
     }
 }

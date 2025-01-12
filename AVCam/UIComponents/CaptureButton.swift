@@ -11,7 +11,7 @@ import SwiftUI
 @MainActor
 struct CaptureButton: View {
     
-    @State var camera: Camera
+    let camera: Camera
 
     private let mainButtonDimension: CGFloat = 68
     
