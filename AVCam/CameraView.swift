@@ -53,9 +53,14 @@ struct CameraView: View {
                     print("Activity: \(activity)")
                     switch activity {
                         case .willCapture:
-                            blink = true
+                            withAnimation(.linear(duration: 0.05)) {
+                                blink = true
+                            } completion: {
+                                withAnimation(.linear(duration: 0.05)) {
+                                    blink = false
+                                }
+                            }
                         case .didCapture(let data):
-                            blink = false
                             photoData = data
                     }
                 }
