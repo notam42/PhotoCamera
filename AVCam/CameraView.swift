@@ -14,7 +14,7 @@ struct CameraView: View {
     let camera: Camera
 
     @State private var blink: Bool = false
-    @State private var photoData: Data?
+    @State fileprivate var uiImage: UIImage?
 
 
     var body: some View {
@@ -22,21 +22,28 @@ struct CameraView: View {
             // A container view that manages the placement of the preview.
             PreviewContainer(camera: camera) {
                 // A view that provides a preview of the captured content.
-                CameraPreview(camera: camera)
+                if let uiImage {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                }
+                else {
+                    CameraPreview(camera: camera)
                     // Handle capture events from device hardware buttons.
-                    .onCameraCaptureEvent { event in
-                        if event.phase == .ended {
-                            Task {
-                                await camera.capturePhoto()
+                        .onCameraCaptureEvent { event in
+                            if event.phase == .ended {
+                                Task {
+                                    await camera.capturePhoto()
+                                }
                             }
                         }
-                    }
 
                     // Focus and expose at the tapped point.
-                    .onTapGesture { location in
-                        Task { await camera.focusAndExpose(at: location) }
-                    }
-                    .opacity(blink ? 0 : 1)
+                        .onTapGesture { location in
+                            Task { await camera.focusAndExpose(at: location) }
+                        }
+                        .opacity(blink ? 0 : 1)
+                }
             }
 
             // The main camera user interface.
@@ -44,6 +51,7 @@ struct CameraView: View {
         }
 
         .task {
+            guard !Camera.isPreview else { return }
             // Start the capture pipeline.
             await camera.start()
             Task {
@@ -59,8 +67,12 @@ struct CameraView: View {
                                     blink = false
                                 }
                             }
-                        case .didCapture(let data):
-                            photoData = data
+
+                        case .didCapture(let uiImage):
+                            self.uiImage = uiImage
+
+                        case .didImport(let uiImage):
+                            self.uiImage = uiImage
                     }
                 }
             }

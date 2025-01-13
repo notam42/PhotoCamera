@@ -148,8 +148,8 @@
 			isa = PBXGroup;
 			children = (
 				C47390512BC3464500EC7B9D /* Camera */,
-				C472D847285BD4A40082244A /* Views */,
 				C400F46428DFDD4800861093 /* UIComponents */,
+				C472D847285BD4A40082244A /* Views */,
 				C4E15AAE2898620E00827683 /* CameraView.swift */,
 				C4F82C9C285ADDA2005D427A /* AVCamApp.swift */,
 				C4F82CA0285ADDA3005D427A /* Assets.xcassets */,

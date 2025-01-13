@@ -6,7 +6,7 @@ An object that provides the interface to the features of the camera.
 */
 
 @preconcurrency import AVFoundation
-//import SwiftUI
+import UIKit.UIImage
 
 /// An object that provides the interface to the features of the camera.
 ///
@@ -47,10 +47,7 @@ final class Camera {
     // MARK: - Starting the camera
     /// Start the camera and begin the stream of data.
     func start() async {
-        guard !Self.isPreview else {
-            status = .running
-            return
-        }
+        guard !Self.isPreview else { return }
 
         // Verify that the person authorizes the app to use device cameras.
         guard await captureService.isAuthorized else {
@@ -92,5 +89,11 @@ final class Camera {
         await captureService.focusAndExpose(at: point)
     }
 
-    private static let isPreview: Bool = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+    // MARK: - Import image and pass it via the stream
+
+    func importImage(data: Data) {
+        captureService.activityContinuation.yield(.didImport(uiImage: UIImage(data: data)))
+    }
+
+    static let isPreview: Bool = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
 }

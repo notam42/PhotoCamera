@@ -20,7 +20,7 @@ struct MainToolbar: PlatformView {
 
     var body: some View {
         HStack {
-			PhotoPickerButton()
+            PhotoPickerButton(camera: camera)
             Spacer()
             CaptureButton(camera: camera)
             Spacer()
@@ -41,6 +41,7 @@ struct MainToolbar: PlatformView {
 /// A view that displays a button to select a photo from the library.
 private struct PhotoPickerButton: View {
 
+    let camera: Camera
     @State private var selectedItem: PhotosPickerItem?
 
     var body: some View {
@@ -48,6 +49,15 @@ private struct PhotoPickerButton: View {
             Image(systemName: "photo.on.rectangle")
         }
         .frame(width: largeButtonSize.width, height: largeButtonSize.height)
+        .onChange(of: selectedItem) {
+            if let selectedItem {
+                Task {
+                    if let data = try? await selectedItem.loadTransferable(type: Data.self) {
+                        camera.importImage(data: data)
+                    }
+                }
+            }
+        }
     }
 }
 

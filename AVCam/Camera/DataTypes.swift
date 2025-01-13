@@ -6,6 +6,8 @@ Supporting data types for the app.
 */
 
 import AVFoundation
+import UIKit.UIImage
+
 
 // MARK: - Supporting types
 
@@ -26,7 +28,8 @@ enum CameraStatus {
 /// This type provides feedback to the UI regarding the active status of the `CaptureService` actor.
 enum CaptureActivity {
     case willCapture
-    case didCapture(data: Data?)
+    case didCapture(uiImage: UIImage?)
+    case didImport(uiImage: UIImage?)
 }
 
 enum CameraError: Error {

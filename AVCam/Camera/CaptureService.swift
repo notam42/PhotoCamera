@@ -7,6 +7,7 @@ An object that manages a capture session and its inputs and outputs.
 
 import Foundation
 @preconcurrency import AVFoundation
+import UIKit.UIImage
 
 /// An actor that manages the capture pipeline, which includes the capture session, device inputs, and capture outputs.
 /// The app defines it as an `actor` type to ensure that all camera operations happen off of the `@MainActor`.
@@ -17,7 +18,7 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
 
     /// A stream of capture activity values that indicate the current state of progress.
     let activityStream: AsyncStream<CaptureActivity>
-    private let activityContinuation: AsyncStream<CaptureActivity>.Continuation
+    let activityContinuation: AsyncStream<CaptureActivity>.Continuation
 
     /// Whether to use the front camera first
     let forSelfie: Bool
@@ -370,11 +371,34 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
     }
 
     nonisolated func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-        if let error = error {
+        if let error {
             logger.error("Error capturing photo: \(error))")
             return
         }
-        let photoData = photo.fileDataRepresentation()
-        activityContinuation.yield(.didCapture(data: photoData))
+        guard let cgImage = photo.cgImageRepresentation(),
+            let metadataOrientation = photo.metadata[String(kCGImagePropertyOrientation)] as? UInt32,
+                let cgImageOrientation = CGImagePropertyOrientation(rawValue: metadataOrientation) else {
+            activityContinuation.yield(.didCapture(uiImage: nil))
+            return
+        }
+        let uiImage = UIImage(cgImage: cgImage, scale: 1, orientation: .from(cgImageOrientation))
+        activityContinuation.yield(.didCapture(uiImage: uiImage))
     }
+}
+
+
+private extension UIImage.Orientation {
+
+	static func from(_ cgImageOrientation: CGImagePropertyOrientation) -> Self {
+		switch cgImageOrientation {
+			case .up: .up
+			case .upMirrored: .upMirrored
+			case .down: .down
+			case .downMirrored: .downMirrored
+			case .left: .left
+			case .leftMirrored: .leftMirrored
+			case .right: .right
+			case .rightMirrored: .rightMirrored
+		}
+	}
 }
