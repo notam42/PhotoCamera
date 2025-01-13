@@ -10,6 +10,7 @@ import PhotosUI
 
 private let largeButtonSize = CGSize(width: 64, height: 64)
 private let toolbarHeight = 80.0
+private let captureButtonDimension = 68.0
 
 
 // MARK: - Toolbar
@@ -86,16 +87,13 @@ private struct CaptureButton: View {
 
     let camera: Camera
 
-    private let mainButtonDimension: CGFloat = 68
-
     var body: some View {
         PhotoCaptureButton {
             Task {
                 await camera.capturePhoto()
             }
         }
-        .aspectRatio(1.0, contentMode: .fit)
-        .frame(width: mainButtonDimension)
+        .frame(width: captureButtonDimension)
     }
 }
 

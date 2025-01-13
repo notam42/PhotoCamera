@@ -19,7 +19,7 @@ struct AVCamApp: App {
     
     var body: some Scene {
         WindowGroup {
-            CameraView(camera: camera)
+            CameraView(camera: camera, viewfinderShape: .round)
                 .statusBarHidden(true)
         }
     }

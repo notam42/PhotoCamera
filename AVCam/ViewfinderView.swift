@@ -24,14 +24,9 @@ struct ViewfinderView: UIViewRepresentable {
         init(session: AVCaptureSession) {
             super.init(frame: .zero)
 #if targetEnvironment(simulator)
-            // The capture APIs require running on a real device. If running
-            // in Simulator, display a static image to represent the video feed.
-            let imageView = UIImageView(frame: UIScreen.main.bounds)
-            imageView.image = UIImage(named: "photo_mode")
-            imageView.contentMode = .scaleAspectFill
-            imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            addSubview(imageView)
+            backgroundColor = .gray
 #endif
+            previewLayer.videoGravity = .resizeAspectFill
             previewLayer.session = session
         }
         

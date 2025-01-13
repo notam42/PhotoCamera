@@ -10,13 +10,18 @@ import AVFoundation
 import AVKit
 
 
-private let viewfinderAspectRatio = CGSize(width: 3, height: 4)
-private let viewfinderYOffset = CGFloat(-80 / 2) // half of toolbar height
-
-
 struct CameraView: View {
 
+    enum ViewfinderShape {
+        case round
+        case square
+        case rect3x4
+        case rect9x16
+        case fullScreen
+    }
+
     let camera: Camera
+    let viewfinderShape: ViewfinderShape
 
     @State private var blink: Bool = false // capture blink effect
     @State private var blurRadius = CGFloat.zero // camera switch blur effect
@@ -35,7 +40,7 @@ struct CameraView: View {
                 }
                 else {
                     ViewfinderView(camera: camera)
-                    // Handle capture events from device hardware buttons.
+                        // Handle capture events from device hardware buttons.
                         .onCameraCaptureEvent { event in
                             if event.phase == .ended {
                                 Task {
@@ -44,7 +49,7 @@ struct CameraView: View {
                             }
                         }
 
-                    // Focus and expose at the tapped point.
+                        // Focus and expose at the tapped point.
                         .onTapGesture { location in
                             Task { await camera.focusAndExpose(at: location) }
                         }
@@ -88,14 +93,61 @@ struct CameraView: View {
 
     // MARK: - viewfinder container
 
-    private func viewfinderContainer(@ViewBuilder content: () -> some View) -> some View {
-        content()
-            .clipped()
-            .aspectRatio(viewfinderAspectRatio, contentMode: .fit)
-            .offset(y: viewfinderYOffset)
-            .blur(radius: blurRadius, opaque: true)
-            .onChange(of: camera.isSwitchingModes, updateBlurRadius(_:_:))
-            .onChange(of: camera.isSwitchingVideoDevices, updateBlurRadius(_:_:))
+    private func viewfinderContainer(@ViewBuilder content: @escaping () -> some View) -> some View {
+        GeometryReader { proxy in
+            VStack {
+                let ratio = aspectRatioFromShape()
+                let width = proxy.size.width
+                let height = ratio.map { width / $0 } ?? proxy.size.height
+                if ratio != nil {
+                    Spacer()
+                }
+                content()
+                    .aspectRatio(ratio, contentMode: .fill)
+                    .frame(width: width, height: height)
+                    .blur(radius: blurRadius, opaque: true)
+                    .overlay {
+                        if viewfinderShape == .round {
+                            holeMask(width: width, height: height)
+                        }
+                    }
+                    .clipped()
+                    .offset(y: viewfinderYOffset())
+                    .onChange(of: camera.isSwitchingModes, updateBlurRadius(_:_:))
+                    .onChange(of: camera.isSwitchingVideoDevices, updateBlurRadius(_:_:))
+                if ratio != nil {
+                    Spacer()
+                }
+            }
+        }
+    }
+
+    private func aspectRatioFromShape() -> CGFloat? {
+        switch viewfinderShape {
+            case .round, .square: 1
+            case .rect3x4: 3 / 4
+            case .rect9x16: 9 / 16
+            case .fullScreen: nil
+        }
+    }
+
+    private func holeMask(width: CGFloat, height: CGFloat) -> some View {
+        Rectangle()
+            .fill(.black)
+            .mask(
+                HoleShapeMask(CGRect(x: 0, y: 0, width: width, height: height), in: CGRect(x: 0, y: 0, width: width, height: height))
+                    .fill(style: .init(eoFill: true))
+            )
+    }
+
+    private func HoleShapeMask(_ hole: CGRect, in rect: CGRect) -> Path {
+        var shape = Rectangle().path(in: rect)
+        shape.addPath(Circle().path(in: hole))
+        return shape
+    }
+
+    private func viewfinderYOffset() -> CGFloat {
+        [.round, .square, .rect3x4].contains(viewfinderShape) ? -80.0 / 2 : 0
     }
 
     private func updateBlurRadius(_: Bool, _ isSwitching: Bool) {
@@ -121,6 +173,22 @@ struct CameraView: View {
     }
 }
 
-#Preview {
-    CameraView(camera: Camera())
+#Preview("Round") {
+    CameraView(camera: Camera(), viewfinderShape: .round)
+}
+
+#Preview("Square") {
+    CameraView(camera: Camera(), viewfinderShape: .square)
+}
+
+#Preview("Rect3x4") {
+    CameraView(camera: Camera(), viewfinderShape: .rect3x4)
+}
+
+#Preview("Rect9x16") {
+    CameraView(camera: Camera(), viewfinderShape: .rect9x16)
+}
+
+#Preview("Full screen") {
+    CameraView(camera: Camera(), viewfinderShape: .fullScreen)
 }

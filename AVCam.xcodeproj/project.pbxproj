@@ -15,7 +15,6 @@
 		C4E15AAF2898620E00827683 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E15AAE2898620E00827683 /* CameraView.swift */; };
 		C4F82C9D285ADDA2005D427A /* AVCamApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F82C9C285ADDA2005D427A /* AVCamApp.swift */; };
 		C4F82CA1285ADDA3005D427A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4F82CA0285ADDA3005D427A /* Assets.xcassets */; };
-		C4F82CA5285ADDA3005D427A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4F82CA4285ADDA3005D427A /* Preview Assets.xcassets */; };
 		C4F82CCC285AE206005D427A /* CaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F82CCB285AE206005D427A /* CaptureService.swift */; };
 		C4F82CCE285AE233005D427A /* ViewfinderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F82CCD285AE233005D427A /* ViewfinderView.swift */; };
 /* End PBXBuildFile section */
@@ -56,7 +55,6 @@
 		C4F82C99285ADDA2005D427A /* AVCam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AVCam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4F82C9C285ADDA2005D427A /* AVCamApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVCamApp.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4F82CA0285ADDA3005D427A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C4F82CA4285ADDA3005D427A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		C4F82CCB285AE206005D427A /* CaptureService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaptureService.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4F82CCD285AE233005D427A /* ViewfinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewfinderView.swift; sourceTree = "<group>"; usesTabs = 0; };
 /* End PBXFileReference section */
@@ -128,19 +126,10 @@
 				C4E15AAE2898620E00827683 /* CameraView.swift */,
 				C4F82C9C285ADDA2005D427A /* AVCamApp.swift */,
 				C4F82CA0285ADDA3005D427A /* Assets.xcassets */,
-				C4F82CA3285ADDA3005D427A /* Preview Content */,
 			);
 			path = AVCam;
 			sourceTree = "<group>";
 			usesTabs = 0;
-		};
-		C4F82CA3285ADDA3005D427A /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				C4F82CA4285ADDA3005D427A /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
-			sourceTree = "<group>";
 		};
 		FCF92A11B01F69F19EA587A6 /* LICENSE */ = {
 			isa = PBXGroup;
@@ -212,7 +201,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C4F82CA5285ADDA3005D427A /* Preview Assets.xcassets in Resources */,
 				C4F82CA1285ADDA3005D427A /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -374,7 +362,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"AVCam/Preview Content\"";
 				DEVELOPMENT_TEAM = 639KEQWW6F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -422,7 +409,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"AVCam/Preview Content\"";
 				DEVELOPMENT_TEAM = 639KEQWW6F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;

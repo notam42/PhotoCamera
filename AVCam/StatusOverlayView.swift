@@ -42,9 +42,9 @@ struct StatusOverlayView: View {
 }
 
 #Preview("Failed") {
-    CameraView(camera: Camera(status: .failed))
+    CameraView(camera: Camera(status: .failed), viewfinderShape: .rect3x4)
 }
 
 #Preview("Unauthorized") {
-    CameraView(camera: Camera(status: .unauthorized))
+    CameraView(camera: Camera(status: .unauthorized), viewfinderShape: .fullScreen)
 }
