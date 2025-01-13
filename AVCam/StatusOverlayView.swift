@@ -20,35 +20,24 @@ struct StatusOverlayView: View {
 			// Status message.
 			Text(message)
 				.font(.headline)
-                .foregroundColor(color == .yellow ? .init(white: 0.25) : .white)
+                .foregroundColor(.white)
 				.padding()
-				.background(color)
+                .background(.ultraThinMaterial)
 				.cornerRadius(8.0)
                 .padding(16)
                 .frame(maxWidth: 600)
 		}
 	}
-	
-	var color: Color {
-		switch status {
-		case .unauthorized:
-			return .red
-		case .failed:
-			return .orange
-		default:
-			return .clear
-		}
-	}
-	
+
 	var message: String {
-		switch status {
-		case .unauthorized:
-			return "You haven't authorized the app to use the camera. Change these settings in Settings → Privacy & Security"
-		case .failed:
-			return "The camera failed to start. Please try relaunching the app."
-		default:
-			return ""
-		}
+        switch status {
+            case .unauthorized:
+                "You haven't authorized the app to use the camera. Change these settings in Settings → Privacy & Security"
+            case .failed:
+                "The camera failed to start. Please try relaunching the app."
+            default:
+                ""
+        }
 	}
 }
 

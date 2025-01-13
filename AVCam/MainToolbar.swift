@@ -1,21 +1,22 @@
 /*
-See the LICENSE.txt file for this sample’s licensing information.
+ See the LICENSE.txt file for this sample’s licensing information.
 
-Abstract:
-A view that displays controls to capture, switch cameras, and view the last captured media item.
-*/
+ Abstract:
+ A view that displays controls to capture, switch cameras, and view the last captured media item.
+ */
 
 import SwiftUI
 import PhotosUI
 
+private let largeButtonSize = CGSize(width: 64, height: 64)
+private let toolbarHeight = 80.0
+
+
 // MARK: - Toolbar
 
 /// A view that displays controls to capture, switch cameras, and view the last captured media item.
-struct MainToolbar: PlatformView {
+struct MainToolbar: View {
 
-    @Environment(\.verticalSizeClass) var verticalSizeClass
-    @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    
     let camera: Camera
 
     var body: some View {
@@ -28,12 +29,9 @@ struct MainToolbar: PlatformView {
         }
         .foregroundColor(.white)
         .font(.system(size: 24))
-        .frame(width: width, height: height)
-        .padding([.leading, .trailing])
+        .frame(height: toolbarHeight)
+        .padding(.horizontal)
     }
-    
-    var width: CGFloat? { isRegularSize ? 250 : nil }
-    var height: CGFloat? { 80 }
 }
 
 // MARK: - Photo picker button

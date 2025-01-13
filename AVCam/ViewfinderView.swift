@@ -6,31 +6,24 @@ A view that presents a video preview of the captured content.
 */
 
 import SwiftUI
-@preconcurrency import AVFoundation
+import AVFoundation
 
-struct CameraPreview: UIViewRepresentable {
+struct ViewfinderView: UIViewRepresentable {
     
     let camera: Camera
 
     func makeUIView(context: Context) -> PreviewView {
-        let preview = PreviewView(session: camera.captureSession)
-        // Connect the preview layer to the capture session.
-        return preview
+        PreviewView(session: camera.captureSession)
     }
     
     func updateUIView(_ previewView: PreviewView, context: Context) {
-        // No-op.
     }
     
-    /// A class that presents the captured content.
-    ///
-    /// This class owns the `AVCaptureVideoPreviewLayer` that presents the captured content.
-    ///
     class PreviewView: UIView {
         
         init(session: AVCaptureSession) {
             super.init(frame: .zero)
-    #if targetEnvironment(simulator)
+#if targetEnvironment(simulator)
             // The capture APIs require running on a real device. If running
             // in Simulator, display a static image to represent the video feed.
             let imageView = UIImageView(frame: UIScreen.main.bounds)
@@ -38,7 +31,7 @@ struct CameraPreview: UIViewRepresentable {
             imageView.contentMode = .scaleAspectFill
             imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             addSubview(imageView)
-    #endif
+#endif
             previewLayer.session = session
         }
         
@@ -46,7 +39,6 @@ struct CameraPreview: UIViewRepresentable {
             fatalError("init(coder:) has not been implemented")
         }
         
-        // Use the preview layer as the view's backing layer.
         override class var layerClass: AnyClass {
             AVCaptureVideoPreviewLayer.self
         }

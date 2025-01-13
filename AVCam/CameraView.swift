@@ -9,18 +9,24 @@ import SwiftUI
 import AVFoundation
 import AVKit
 
+
+private let viewfinderAspectRatio = CGSize(width: 3, height: 4)
+private let viewfinderYOffset = CGFloat(-80 / 2) // half of toolbar height
+
+
 struct CameraView: View {
 
     let camera: Camera
 
-    @State private var blink: Bool = false
-    @State fileprivate var uiImage: UIImage?
+    @State private var blink: Bool = false // capture blink effect
+    @State private var blurRadius = CGFloat.zero // camera switch blur effect
+    @State private var uiImage: UIImage? // result
 
 
     var body: some View {
         ZStack {
             // A container view that manages the placement of the preview.
-            PreviewContainer(camera: camera) {
+            viewfinderContainer {
                 // A view that provides a preview of the captured content.
                 if let uiImage {
                     Image(uiImage: uiImage)
@@ -28,7 +34,7 @@ struct CameraView: View {
                         .aspectRatio(contentMode: .fill)
                 }
                 else {
-                    CameraPreview(camera: camera)
+                    ViewfinderView(camera: camera)
                     // Handle capture events from device hardware buttons.
                         .onCameraCaptureEvent { event in
                             if event.phase == .ended {
@@ -45,9 +51,10 @@ struct CameraView: View {
                         .opacity(blink ? 0 : 1)
                 }
             }
+            .ignoresSafeArea()
 
             // The main camera user interface.
-            CameraUI(camera: camera)
+            cameraUI()
         }
 
         .task {
@@ -76,6 +83,40 @@ struct CameraView: View {
                     }
                 }
             }
+        }
+    }
+
+    // MARK: - viewfinder container
+
+    private func viewfinderContainer(@ViewBuilder content: () -> some View) -> some View {
+        content()
+            .clipped()
+            .aspectRatio(viewfinderAspectRatio, contentMode: .fit)
+            .offset(y: viewfinderYOffset)
+            .blur(radius: blurRadius, opaque: true)
+            .onChange(of: camera.isSwitchingModes, updateBlurRadius(_:_:))
+            .onChange(of: camera.isSwitchingVideoDevices, updateBlurRadius(_:_:))
+    }
+
+    private func updateBlurRadius(_: Bool, _ isSwitching: Bool) {
+        withAnimation {
+            blurRadius = isSwitching ? 30 : 0
+        }
+    }
+
+    // MARK: - camera UI
+
+    private func cameraUI() -> some View {
+        VStack {
+            Spacer()
+            MainToolbar(camera: camera)
+                .background(.ultraThinMaterial.opacity(0.8))
+                .cornerRadius(12)
+                .padding(.bottom, 32)
+                .padding(.horizontal)
+        }
+        .overlay {
+            StatusOverlayView(status: camera.status)
         }
     }
 }
