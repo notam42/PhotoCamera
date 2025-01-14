@@ -12,6 +12,8 @@ import UIKit.UIImage
 
 struct CameraView: View {
 
+    @Environment(\.dismiss) private var dismiss
+
     enum ViewfinderShape {
         case round
         case square
@@ -62,7 +64,13 @@ struct CameraView: View {
 
             // The main camera user interface.
             cameraUI()
+
+            // X button
+            closeButton()
         }
+
+        .background(.black)
+        .statusBarHidden(true)
 
         .task {
             guard !Camera.isPreview else { return }
@@ -90,6 +98,25 @@ struct CameraView: View {
                     }
                 }
             }
+        }
+    }
+
+    private func closeButton() -> some View {
+        VStack(alignment: .trailing) {
+            HStack {
+                Spacer()
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                }
+                .frame(width: 44, height: 44)
+                .foregroundColor(.white)
+                .font(.system(size: 28))
+                .shadow(color: .black, radius: 3)
+                .padding(.horizontal)
+            }
+            Spacer()
         }
     }
 

@@ -12,17 +12,12 @@ import SwiftUI
 /// The AVCam app's main entry point.
 struct AVCamApp: App {
 
-    private let camera = Camera(forSelfie: true)
-    
     // An indication of the scene's operational state.
     @Environment(\.scenePhase) var scenePhase
     
     var body: some Scene {
         WindowGroup {
-            CameraView(camera: camera, viewfinderShape: .round) { image in
-                print("Result:", image?.description ?? "none")
-            }
-            .statusBarHidden(true)
+            MainDemoView()
         }
     }
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		362043652D36D2B900C7DC36 /* MainDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 362043642D36D2B900C7DC36 /* MainDemoView.swift */; };
 		C472D846285BBFA60082244A /* DeviceLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = C472D845285BBFA60082244A /* DeviceLookup.swift */; };
 		C472D84F285BDFA60082244A /* CameraToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C472D84D285BDFA60082244A /* CameraToolbar.swift */; };
 		C48091852BD584AD00753C4A /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48091832BD584AD00753C4A /* Camera.swift */; };
@@ -43,6 +44,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		362043642D36D2B900C7DC36 /* MainDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainDemoView.swift; sourceTree = "<group>"; };
 		4171C532FBB2053E055D7336 /* SampleCode.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
 		B92404E334D9008D3705950F /* LICENSE.txt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		C472D845285BBFA60082244A /* DeviceLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceLookup.swift; sourceTree = "<group>"; usesTabs = 0; };
@@ -124,6 +126,7 @@
 				C4DFD84528C3ED3D005B74F0 /* StatusOverlayView.swift */,
 				C4F82CCD285AE233005D427A /* ViewfinderView.swift */,
 				C4E15AAE2898620E00827683 /* CameraView.swift */,
+				362043642D36D2B900C7DC36 /* MainDemoView.swift */,
 				C4F82C9C285ADDA2005D427A /* AVCamApp.swift */,
 				C4F82CA0285ADDA3005D427A /* Assets.xcassets */,
 			);
@@ -220,6 +223,7 @@
 				C4E15AAF2898620E00827683 /* CameraView.swift in Sources */,
 				C4DFD84428C3E173005B74F0 /* DataTypes.swift in Sources */,
 				C472D846285BBFA60082244A /* DeviceLookup.swift in Sources */,
+				362043652D36D2B900C7DC36 /* MainDemoView.swift in Sources */,
 				C4DFD84628C3ED3D005B74F0 /* StatusOverlayView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
