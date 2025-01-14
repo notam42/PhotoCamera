@@ -29,7 +29,6 @@ struct CameraView: View {
     @State private var blink: Bool = false // capture blink effect
     @State private var blurRadius = CGFloat.zero // camera switch blur effect
     @State private var capturedImage: UIImage? // result
-    @State private var confirmed: Bool = false
 
 
     var body: some View {
@@ -79,7 +78,6 @@ struct CameraView: View {
             Task {
                 // Listen to capture events
                 for await activity in camera.activityStream {
-                    print("Activity: \(activity)")
                     switch activity {
                         case .willCapture:
                             withAnimation(.linear(duration: 0.05)) {
@@ -91,10 +89,14 @@ struct CameraView: View {
                             }
 
                         case .didCapture(let uiImage):
-                            capturedImage = uiImage
+                            withAnimation(.linear(duration: 0.1)) {
+                                capturedImage = uiImage
+                            }
 
                         case .didImport(let uiImage):
-                            capturedImage = uiImage
+                            withAnimation(.linear(duration: 0.1)) {
+                                capturedImage = uiImage
+                            }
                     }
                 }
             }
@@ -190,11 +192,15 @@ struct CameraView: View {
     private func cameraUI() -> some View {
         VStack {
             Spacer()
-            CameraToolbar(camera: camera, capturedImage: $capturedImage, onConfirm: onConfirm)
-                .background(.ultraThinMaterial.opacity(0.8))
-                .cornerRadius(12)
-                .padding(.bottom, 32)
-                .padding(.horizontal)
+            CameraToolbar(camera: camera, capturedImage: $capturedImage) { result in
+                // TODO: resize
+                dismiss()
+                onConfirm(result)
+            }
+            .background(.ultraThinMaterial.opacity(0.3))
+            .cornerRadius(12)
+            .padding(.bottom, 32)
+            .padding(.horizontal)
         }
         .overlay {
             StatusOverlayView(status: camera.status)

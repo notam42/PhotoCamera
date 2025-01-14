@@ -41,7 +41,7 @@ struct CameraToolbar: View {
             }
         }
         .foregroundColor(.white)
-        .font(.system(size: 28, weight: .semibold))
+        .font(.system(size: 24, weight: .medium))
         .frame(height: toolbarHeight)
         .padding(.horizontal)
     }
@@ -95,7 +95,7 @@ struct CameraToolbar: View {
             Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.camera")
         }
         .frame(width: largeButtonSize.width, height: largeButtonSize.height)
-        .allowsHitTesting(!camera.isSwitchingVideoDevices)
+        .disabled(camera.isSwitchingVideoDevices)
     }
 
     // MARK: - Capture button
@@ -132,13 +132,11 @@ struct CameraToolbar: View {
 // MARK: - Preview
 
 #Preview("Capture") {
-    Group {
-        CameraToolbar(camera: Camera(), capturedImage: .constant(nil)) { _ in }
-    }
+    CameraToolbar(camera: Camera(), capturedImage: .constant(nil)) { _ in }
+        .background(.black)
 }
 
 #Preview("Preview") {
-    Group {
-        CameraToolbar(camera: Camera(), capturedImage: .constant(UIImage())) { _ in }
-    }
+    CameraToolbar(camera: Camera(), capturedImage: .constant(UIImage())) { _ in }
+        .background(.black)
 }
