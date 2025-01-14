@@ -6,8 +6,8 @@ The main user interface for the sample app.
 */
 
 import SwiftUI
-import AVFoundation
 import AVKit
+import UIKit.UIImage
 
 
 struct CameraView: View {
@@ -22,10 +22,12 @@ struct CameraView: View {
 
     let camera: Camera
     let viewfinderShape: ViewfinderShape
+    let onConfirm: (UIImage?) -> Void
 
     @State private var blink: Bool = false // capture blink effect
     @State private var blurRadius = CGFloat.zero // camera switch blur effect
-    @State private var uiImage: UIImage? // result
+    @State private var capturedImage: UIImage? // result
+    @State private var confirmed: Bool = false
 
 
     var body: some View {
@@ -33,8 +35,8 @@ struct CameraView: View {
             // A container view that manages the placement of the preview.
             viewfinderContainer {
                 // A view that provides a preview of the captured content.
-                if let uiImage {
-                    Image(uiImage: uiImage)
+                if let capturedImage {
+                    Image(uiImage: capturedImage)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                 }
@@ -81,10 +83,10 @@ struct CameraView: View {
                             }
 
                         case .didCapture(let uiImage):
-                            self.uiImage = uiImage
+                            capturedImage = uiImage
 
                         case .didImport(let uiImage):
-                            self.uiImage = uiImage
+                            capturedImage = uiImage
                     }
                 }
             }
@@ -161,7 +163,7 @@ struct CameraView: View {
     private func cameraUI() -> some View {
         VStack {
             Spacer()
-            MainToolbar(camera: camera)
+            CameraToolbar(camera: camera, capturedImage: $capturedImage, onConfirm: onConfirm)
                 .background(.ultraThinMaterial.opacity(0.8))
                 .cornerRadius(12)
                 .padding(.bottom, 32)
@@ -174,21 +176,21 @@ struct CameraView: View {
 }
 
 #Preview("Round") {
-    CameraView(camera: Camera(), viewfinderShape: .round)
+    CameraView(camera: Camera(), viewfinderShape: .round) { _ in }
 }
 
 #Preview("Square") {
-    CameraView(camera: Camera(), viewfinderShape: .square)
+    CameraView(camera: Camera(), viewfinderShape: .square) { _ in }
 }
 
 #Preview("Rect3x4") {
-    CameraView(camera: Camera(), viewfinderShape: .rect3x4)
+    CameraView(camera: Camera(), viewfinderShape: .rect3x4) { _ in }
 }
 
 #Preview("Rect9x16") {
-    CameraView(camera: Camera(), viewfinderShape: .rect9x16)
+    CameraView(camera: Camera(), viewfinderShape: .rect9x16) { _ in }
 }
 
 #Preview("Full screen") {
-    CameraView(camera: Camera(), viewfinderShape: .fullScreen)
+    CameraView(camera: Camera(), viewfinderShape: .fullScreen) { _ in }
 }

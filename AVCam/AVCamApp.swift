@@ -19,8 +19,10 @@ struct AVCamApp: App {
     
     var body: some Scene {
         WindowGroup {
-            CameraView(camera: camera, viewfinderShape: .round)
-                .statusBarHidden(true)
+            CameraView(camera: camera, viewfinderShape: .round) { image in
+                print("Result:", image?.description ?? "none")
+            }
+            .statusBarHidden(true)
         }
     }
 }
