@@ -32,9 +32,9 @@ struct CameraView: View {
 
 
     var body: some View {
-        ZStack {
+        GeometryReader { proxy in
             // A container view that manages the placement of the preview.
-            viewfinderContainer {
+            viewfinderContainer(viewSize: proxy.size) {
                 // A view that provides a preview of the captured content.
                 if let capturedImage {
                     Image(uiImage: capturedImage)
@@ -57,48 +57,56 @@ struct CameraView: View {
                         .opacity(blink ? 0 : 1)
                 }
             }
-            .ignoresSafeArea()
 
-            // The main camera user interface.
-            cameraUI()
-
-            // X button
-            closeButton()
-        }
-
-        .background(.black)
-        .statusBarHidden(true)
-
-        .task {
-            guard !Camera.isPreview else { return }
-            // Start the capture pipeline.
-            await camera.start()
-            Task {
-                // Listen to capture events
-                for await activity in camera.activityStream {
-                    switch activity {
-                        case .willCapture:
-                            withAnimation(.linear(duration: 0.05)) {
-                                blink = true
-                            } completion: {
+            .task {
+                guard !Camera.isPreview else { return }
+                // Start the capture pipeline.
+                await camera.start()
+                Task {
+                    // Listen to capture events
+                    for await activity in camera.activityStream {
+                        switch activity {
+                            case .willCapture:
                                 withAnimation(.linear(duration: 0.05)) {
-                                    blink = false
+                                    blink = true
+                                } completion: {
+                                    withAnimation(.linear(duration: 0.05)) {
+                                        blink = false
+                                    }
                                 }
-                            }
 
-                        case .didCapture(let uiImage):
-                            withAnimation(.linear(duration: 0.1)) {
-                                capturedImage = uiImage
-                            }
+                            case .didCapture(let uiImage):
+                                withAnimation(.linear(duration: 0.1)) {
+                                    capturedImage = uiImage.map { crop(image: $0, viewSize: proxy.size) }
+                                }
 
-                        case .didImport(let uiImage):
-                            withAnimation(.linear(duration: 0.1)) {
-                                capturedImage = uiImage
-                            }
+                            case .didImport(let uiImage):
+                                withAnimation(.linear(duration: 0.1)) {
+                                    capturedImage = uiImage.map { crop(image: $0, viewSize: proxy.size) }
+                                }
+                        }
                     }
                 }
             }
         }
+
+        .statusBarHidden(true)
+        .background(.black)
+        .ignoresSafeArea() // order is important
+        .overlay {
+            cameraUI()
+            closeButton()
+        }
+    }
+
+    private func crop(image: UIImage, viewSize: CGSize) -> UIImage {
+        let ratio: CGFloat = switch viewfinderShape {
+            case .round, .square: 1
+            case .rect3x4: 3.0 / 4
+            case .rect9x16: 9.0 / 16
+            case .fullScreen: viewSize.width / viewSize.height
+        }
+        return image.cropped(ratio: ratio)
     }
 
     private func closeButton() -> some View {
@@ -122,30 +130,28 @@ struct CameraView: View {
 
     // MARK: - viewfinder container
 
-    private func viewfinderContainer(@ViewBuilder content: @escaping () -> some View) -> some View {
-        GeometryReader { proxy in
-            VStack {
-                let ratio = aspectRatioFromShape()
-                let width = proxy.size.width
-                let height = ratio.map { width / $0 } ?? proxy.size.height
-                if ratio != nil {
-                    Spacer()
-                }
-                content()
-                    .aspectRatio(ratio, contentMode: .fill)
-                    .frame(width: width, height: height)
-                    .blur(radius: blurRadius, opaque: true)
-                    .overlay {
-                        if viewfinderShape == .round {
-                            holeMask(width: width, height: height)
-                        }
+    private func viewfinderContainer(viewSize: CGSize, @ViewBuilder content: @escaping () -> some View) -> some View {
+        VStack {
+            let ratio = aspectRatioFromShape()
+            let width = viewSize.width
+            let height = ratio.map { width / $0 } ?? viewSize.height
+            if ratio != nil {
+                Spacer()
+            }
+            content()
+                .aspectRatio(ratio, contentMode: .fill)
+                .frame(width: width, height: height)
+                .blur(radius: blurRadius, opaque: true)
+                .overlay {
+                    if viewfinderShape == .round {
+                        holeMask(width: width, height: height)
                     }
-                    .clipped()
-                    .offset(y: viewfinderYOffset())
-                    .onChange(of: camera.isSwitchingVideoDevices, updateBlurRadius(_:_:))
-                if ratio != nil {
-                    Spacer()
                 }
+                .clipped()
+                .offset(y: viewfinderYOffset())
+                .onChange(of: camera.isSwitchingVideoDevices, updateBlurRadius(_:_:))
+            if ratio != nil {
+                Spacer()
             }
         }
     }
@@ -204,6 +210,8 @@ struct CameraView: View {
         }
     }
 }
+
+// MARK: - Previews
 
 #Preview("Round") {
     CameraView(camera: Camera(), viewfinderShape: .round) { _ in }

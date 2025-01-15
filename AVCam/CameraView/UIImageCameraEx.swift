@@ -25,6 +25,23 @@ extension UIImage {
         }
     }
 
+    func cropped(ratio: CGFloat) -> UIImage {
+        // Start with an optimistic assumption that only the height should be changed
+        var newWidth = size.width
+        var newHeight: CGFloat = newWidth / ratio
+
+        // Now see if the new height is greater than the original one and if so, recalculate both width and height:
+        if newHeight > size.height {
+            newWidth = size.height * ratio
+            newHeight = size.height
+        }
+
+        // Crop:
+        newWidth = floor(newWidth)
+        newHeight = floor(newHeight)
+        return cropped(CGRect(x: max(0, (size.width - newWidth) / 2), y: max(0, (size.height - newHeight) / 2), width: newWidth, height: newHeight))
+    }
+
     func cropped(_ cropFrame: CGRect) -> UIImage {
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
