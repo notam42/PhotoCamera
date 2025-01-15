@@ -46,9 +46,7 @@ struct CameraView: View {
                         // Handle capture events from device hardware buttons.
                         .onCameraCaptureEvent { event in
                             if event.phase == .ended {
-                                Task {
-                                    await camera.capturePhoto()
-                                }
+                                camera.capturePhoto()
                             }
                         }
 
@@ -144,7 +142,6 @@ struct CameraView: View {
                     }
                     .clipped()
                     .offset(y: viewfinderYOffset())
-                    .onChange(of: camera.isSwitchingModes, updateBlurRadius(_:_:))
                     .onChange(of: camera.isSwitchingVideoDevices, updateBlurRadius(_:_:))
                 if ratio != nil {
                     Spacer()

@@ -8,6 +8,13 @@ An object that provides the interface to the features of the camera.
 @preconcurrency import AVFoundation
 import UIKit.UIImage
 
+enum CameraStatus {
+    case unknown
+    case unauthorized
+    case failed
+    case running
+}
+
 /// An object that provides the interface to the features of the camera.
 ///
 @Observable
@@ -25,9 +32,6 @@ final class Camera {
 
     /// A Boolean value that indicates whether the app is currently switching video devices.
     private(set) var isSwitchingVideoDevices = false
-
-    /// A Boolean value that indicates whether the app is currently switching capture modes.
-    private(set) var isSwitchingModes = false
 
     /// An error that indicates the details of an error during photo or movie capture.
     private(set) var error: Error?
@@ -77,10 +81,13 @@ final class Camera {
     // MARK: - Photo capture
     
     /// Captures a photo
-    func capturePhoto() async {
+    func capturePhoto() {
         guard !Self.isPreview else { return }
-        await captureService.capturePhoto()
-        logger.info("Photo captured")
+        Task {
+            // Note: even though the below call is async, it doesn't wait for completion of the capture. Use `activityStream` to monitor events in your UI.
+            await captureService.capturePhoto()
+            logger.info("Photo captured")
+        }
     }
 
     /// Performs a focus and expose operation at the specified screen point.

@@ -9,6 +9,20 @@ import Foundation
 @preconcurrency import AVFoundation
 import UIKit.UIImage
 
+enum CaptureActivity {
+    case willCapture
+    case didCapture(uiImage: UIImage?)
+    case didImport(uiImage: UIImage?)
+}
+
+enum CameraError: Error {
+    case videoDeviceUnavailable
+    case addInputFailed
+    case addOutputFailed
+    case setupFailed
+    case deviceChangeFailed
+}
+
 /// An actor that manages the capture pipeline, which includes the capture session, device inputs, and capture outputs.
 /// The app defines it as an `actor` type to ensure that all camera operations happen off of the `@MainActor`.
 actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {

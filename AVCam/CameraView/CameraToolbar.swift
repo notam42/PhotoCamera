@@ -107,9 +107,7 @@ struct CameraToolbar: View {
                 .stroke(lineWidth: lineWidth)
                 .fill(.white)
             Button {
-                Task {
-                    await camera.capturePhoto()
-                }
+                camera.capturePhoto()
             } label: {
                 Circle()
                     .inset(by: lineWidth * 1.2)
