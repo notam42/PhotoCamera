@@ -46,5 +46,5 @@ struct StatusOverlayView: View {
 }
 
 #Preview("Unauthorized") {
-    CameraView(camera: Camera(status: .unauthorized), viewfinderShape: .fullScreen) { _ in }
+    CameraView(camera: Camera(status: .unauthorized), viewfinderShape: .rect9x16) { _ in }
 }

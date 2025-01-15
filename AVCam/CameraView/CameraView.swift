@@ -9,18 +9,24 @@ import SwiftUI
 import AVKit
 import UIKit.UIImage
 
+enum ViewfinderShape {
+    case round
+    case square
+    case rect3x4
+    case rect9x16
+
+    var ratio: CGFloat {
+        switch self {
+            case .round, .square: 1
+            case .rect3x4: 3.0 / 4
+            case .rect9x16: 9.0 / 16
+        }
+    }
+}
 
 struct CameraView: View {
 
     @Environment(\.dismiss) private var dismiss
-
-    enum ViewfinderShape {
-        case round
-        case square
-        case rect3x4
-        case rect9x16
-        case fullScreen
-    }
 
     let camera: Camera
     let viewfinderShape: ViewfinderShape
@@ -77,12 +83,12 @@ struct CameraView: View {
 
                             case .didCapture(let uiImage):
                                 withAnimation(.linear(duration: 0.1)) {
-                                    capturedImage = uiImage.map { crop(image: $0, viewSize: proxy.size) }
+                                    capturedImage = uiImage
                                 }
 
                             case .didImport(let uiImage):
                                 withAnimation(.linear(duration: 0.1)) {
-                                    capturedImage = uiImage.map { crop(image: $0, viewSize: proxy.size) }
+                                    capturedImage = uiImage
                                 }
                         }
                     }
@@ -97,16 +103,6 @@ struct CameraView: View {
             cameraUI()
             closeButton()
         }
-    }
-
-    private func crop(image: UIImage, viewSize: CGSize) -> UIImage {
-        let ratio: CGFloat = switch viewfinderShape {
-            case .round, .square: 1
-            case .rect3x4: 3.0 / 4
-            case .rect9x16: 9.0 / 16
-            case .fullScreen: viewSize.width / viewSize.height
-        }
-        return image.cropped(ratio: ratio)
     }
 
     private func closeButton() -> some View {
@@ -132,12 +128,10 @@ struct CameraView: View {
 
     private func viewfinderContainer(viewSize: CGSize, @ViewBuilder content: @escaping () -> some View) -> some View {
         VStack {
-            let ratio = aspectRatioFromShape()
+            let ratio = viewfinderShape.ratio
             let width = viewSize.width
-            let height = ratio.map { width / $0 } ?? viewSize.height
-            if ratio != nil {
-                Spacer()
-            }
+            let height = width / ratio
+            Spacer()
             content()
                 .aspectRatio(ratio, contentMode: .fill)
                 .frame(width: width, height: height)
@@ -150,18 +144,7 @@ struct CameraView: View {
                 .clipped()
                 .offset(y: viewfinderYOffset())
                 .onChange(of: camera.isSwitchingVideoDevices, updateBlurRadius(_:_:))
-            if ratio != nil {
-                Spacer()
-            }
-        }
-    }
-
-    private func aspectRatioFromShape() -> CGFloat? {
-        switch viewfinderShape {
-            case .round, .square: 1
-            case .rect3x4: 3 / 4
-            case .rect9x16: 9 / 16
-            case .fullScreen: nil
+            Spacer()
         }
     }
 
@@ -196,9 +179,8 @@ struct CameraView: View {
         VStack {
             Spacer()
             CameraToolbar(camera: camera, capturedImage: $capturedImage) { result in
-                // TODO: resize
                 dismiss()
-                onConfirm(result)
+                onConfirm(result?.cropped(ratio: viewfinderShape.ratio))
             }
             .background(.ultraThinMaterial.opacity(0.3))
             .cornerRadius(12)
@@ -227,8 +209,4 @@ struct CameraView: View {
 
 #Preview("Rect9x16") {
     CameraView(camera: Camera(), viewfinderShape: .rect9x16) { _ in }
-}
-
-#Preview("Full screen") {
-    CameraView(camera: Camera(), viewfinderShape: .fullScreen) { _ in }
 }

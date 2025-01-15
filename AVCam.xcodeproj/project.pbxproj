@@ -74,8 +74,8 @@
 			isa = PBXGroup;
 			children = (
 				36CA473D2D37BD4000D10E73 /* UIImageCameraEx.swift */,
-				C472D84D285BDFA60082244A /* CameraToolbar.swift */,
 				C4DFD84528C3ED3D005B74F0 /* StatusOverlayView.swift */,
+				C472D84D285BDFA60082244A /* CameraToolbar.swift */,
 				C4F82CCD285AE233005D427A /* ViewfinderView.swift */,
 				C4E15AAE2898620E00827683 /* CameraView.swift */,
 			);
