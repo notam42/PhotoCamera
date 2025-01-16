@@ -8,20 +8,17 @@ import UIKit.UIImage
 
 extension UIImage {
 
-    func toJpeg(maxNewWidth: CGFloat) -> Data? {
+    func fitted(maxWidth: CGFloat) -> UIImage? {
         guard size.width > 0, size.height > 0 else { return nil }
-        let scale = maxNewWidth / size.width
-        if scale < 1 {
-            let newSize = CGSize(width: size.width * scale, height: size.height * scale)
-            let format = UIGraphicsImageRendererFormat()
-            format.scale = 1 // important; otherwise becomes x3 because it thinks it's for retina display
-            return UIGraphicsImageRenderer(size: newSize, format: format).image { _ in
-                draw(in: CGRect(origin: .zero, size: newSize))
-            }
-            .toJpeg()
+        let scale = maxWidth / size.width
+        guard scale >= 1 else {
+            return self
         }
-        else {
-            return toJpeg()
+        let newSize = CGSize(width: size.width * scale, height: size.height * scale)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1 // important; otherwise becomes x3 because it thinks it's for retina display
+        return UIGraphicsImageRenderer(size: newSize, format: format).image { _ in
+            draw(in: CGRect(origin: .zero, size: newSize))
         }
     }
 
