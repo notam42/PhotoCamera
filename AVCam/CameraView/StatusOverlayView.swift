@@ -14,22 +14,24 @@ struct StatusOverlayView: View {
 
 	var body: some View {
 		if [.unauthorized, .failed].contains(status) {
-			// Dimming view.
-			Rectangle()
-				.fill(Color(white: 0.0, opacity: 0.5))
-			// Status message.
-			Text(message)
-				.font(.headline)
-                .foregroundColor(.white)
-				.padding()
-                .background(.ultraThinMaterial)
-				.cornerRadius(8.0)
-                .padding(16)
-                .frame(maxWidth: 600)
+            ZStack {
+                // Dimming view.
+                Rectangle()
+                    .fill(Color(white: 0.0, opacity: 0.5))
+                // Status message.
+                Text(message)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(8.0)
+                    .padding(16)
+                    .frame(maxWidth: 600)
+            }
 		}
 	}
 
-	var message: String {
+	private var message: String {
         switch status {
             case .unauthorized:
                 "You haven't authorized the app to use the camera. Change these settings in Settings → Privacy & Security"
@@ -42,9 +44,11 @@ struct StatusOverlayView: View {
 }
 
 #Preview("Failed") {
-    CameraView(camera: Camera(status: .failed), viewfinderShape: .rect3x4) { _ in }
+    StatusOverlayView(status: .failed)
+        .ignoresSafeArea()
 }
 
 #Preview("Unauthorized") {
-    CameraView(camera: Camera(status: .unauthorized), viewfinderShape: .rect9x16) { _ in }
+    StatusOverlayView(status: .unauthorized)
+        .ignoresSafeArea()
 }

@@ -28,13 +28,20 @@ struct CameraView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    let camera: Camera
     let viewfinderShape: ViewfinderShape
     let onConfirm: (UIImage?) -> Void
 
+    let camera: Camera
     @State private var blink: Bool = false // capture blink effect
     @State private var blurRadius = CGFloat.zero // camera switch blur effect
     @State private var capturedImage: UIImage? // result
+
+
+    init(forSelfie: Bool, viewfinderShape: ViewfinderShape, onConfirm: @escaping (UIImage?) -> Void) {
+        self.camera = Camera(forSelfie: forSelfie)
+        self.viewfinderShape = viewfinderShape
+        self.onConfirm = onConfirm
+    }
 
 
     var body: some View {
@@ -201,17 +208,17 @@ struct CameraView: View {
 // MARK: - Previews
 
 #Preview("Round") {
-    CameraView(camera: Camera(), viewfinderShape: .round) { _ in }
+    CameraView(forSelfie: true, viewfinderShape: .round) { _ in }
 }
 
 #Preview("Square") {
-    CameraView(camera: Camera(), viewfinderShape: .square) { _ in }
+    CameraView(forSelfie: true, viewfinderShape: .square) { _ in }
 }
 
 #Preview("Rect3x4") {
-    CameraView(camera: Camera(), viewfinderShape: .rect3x4) { _ in }
+    CameraView(forSelfie: true, viewfinderShape: .rect3x4) { _ in }
 }
 
 #Preview("Rect9x16") {
-    CameraView(camera: Camera(), viewfinderShape: .rect9x16) { _ in }
+    CameraView(forSelfie: true, viewfinderShape: .rect9x16) { _ in }
 }

@@ -8,7 +8,6 @@ import SwiftUI
 
 struct MainDemoView: View {
 
-    private let camera = Camera(forSelfie: true)
     @State private var isCameraPresented: Bool = false
     @State private var capturedImage: UIImage?
 
@@ -44,7 +43,7 @@ struct MainDemoView: View {
             .padding(.bottom)
         }
         .fullScreenCover(isPresented: $isCameraPresented) {
-            CameraView(camera: camera, viewfinderShape: .round) { image in
+            CameraView(forSelfie: true, viewfinderShape: .round) { image in
                 capturedImage = image
             }
         }
