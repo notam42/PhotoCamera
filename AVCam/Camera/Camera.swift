@@ -86,7 +86,6 @@ final class Camera {
         Task {
             // Note: even though the below call is async, it doesn't wait for completion of the capture. Use `activityStream` to monitor events in your UI.
             await captureService.capturePhoto()
-            logger.info("Photo captured")
         }
     }
 

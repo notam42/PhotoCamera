@@ -20,14 +20,14 @@ private let captureButtonDimension = 68.0
 struct CameraToolbar: View {
 
     let camera: Camera
-    @Binding var capturedImage: UIImage?
-    let onConfirm: (UIImage?) -> Void
+    let showConfirmation: Bool
+    let onDone: (Bool) -> Void
 
     @State private var libraryItem: PhotosPickerItem?
 
     var body: some View {
         HStack {
-            if capturedImage != nil {
+            if showConfirmation {
                 retryButton()
                 Spacer()
                 confirmButton()
@@ -50,7 +50,7 @@ struct CameraToolbar: View {
 
     private func confirmButton() -> some View {
         Button {
-            onConfirm(capturedImage)
+            onDone(true)
         } label: {
             Image(systemName: "checkmark")
         }
@@ -59,7 +59,7 @@ struct CameraToolbar: View {
 
     private func retryButton() -> some View {
         Button {
-            capturedImage = nil
+            onDone(false)
         } label: {
             Image(systemName: "arrow.uturn.left")
         }
@@ -130,11 +130,11 @@ struct CameraToolbar: View {
 // MARK: - Preview
 
 #Preview("Capture") {
-    CameraToolbar(camera: Camera(), capturedImage: .constant(nil)) { _ in }
+    CameraToolbar(camera: Camera(), showConfirmation: false) { _ in }
         .background(.black)
 }
 
 #Preview("Preview") {
-    CameraToolbar(camera: Camera(), capturedImage: .constant(UIImage())) { _ in }
+    CameraToolbar(camera: Camera(), showConfirmation: true) { _ in }
         .background(.black)
 }

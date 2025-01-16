@@ -178,9 +178,14 @@ struct CameraView: View {
     private func cameraUI() -> some View {
         VStack {
             Spacer()
-            CameraToolbar(camera: camera, capturedImage: $capturedImage) { result in
-                dismiss()
-                onConfirm(result?.cropped(ratio: viewfinderShape.ratio))
+            CameraToolbar(camera: camera, showConfirmation: capturedImage != nil) { result in
+                if result {
+                    dismiss()
+                    onConfirm(capturedImage?.cropped(ratio: viewfinderShape.ratio))
+                }
+                else {
+                    capturedImage = nil
+                }
             }
             .background(.ultraThinMaterial.opacity(0.3))
             .cornerRadius(12)

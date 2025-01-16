@@ -45,7 +45,6 @@ struct MainDemoView: View {
         }
         .fullScreenCover(isPresented: $isCameraPresented) {
             CameraView(camera: camera, viewfinderShape: .round) { image in
-                print("Result:", image?.description ?? "none")
                 capturedImage = image
             }
         }
