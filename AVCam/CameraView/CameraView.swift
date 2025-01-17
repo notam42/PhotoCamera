@@ -31,7 +31,7 @@ struct CameraView: View {
     let viewfinderShape: ViewfinderShape
     let onConfirm: (UIImage?) -> Void
 
-    let camera: Camera
+    @State private var camera: Camera
     @State private var blink: Bool = false // capture blink effect
     @State private var blurRadius = CGFloat.zero // camera switch blur effect
     @State private var capturedImage: UIImage? // result

@@ -40,12 +40,17 @@ final class Camera {
     private let captureService: CaptureService
 
     init(forSelfie: Bool = false) {
+        logger.info("Camera: init")
         self.captureService = CaptureService(forSelfie: forSelfie)
     }
 
     init(status: CameraStatus) { // for previews only
         self.status = status
         self.captureService = CaptureService(forSelfie: false)
+    }
+
+    deinit {
+        logger.info("Camera: deinit")
     }
 
     // MARK: - Starting the camera

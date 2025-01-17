@@ -34,11 +34,11 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
     let activityStream: AsyncStream<CaptureActivity>
     let activityContinuation: AsyncStream<CaptureActivity>.Continuation
 
-    /// Whether to use the front camera first
-    let forSelfie: Bool
-
     /// The capture output type for this service.
     let output = AVCapturePhotoOutput()
+
+    /// Whether to use the front camera first
+    private let forSelfie: Bool
 
     /// The video input for the currently selected device camera.
     private var activeVideoInput: AVCaptureDeviceInput?
@@ -62,10 +62,15 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
     }
 
     init(forSelfie: Bool) {
+        logger.info("CaptureService: init")
         self.forSelfie = forSelfie
         let (activityStream, activityContinuation) = AsyncStream.makeStream(of: CaptureActivity.self)
         self.activityStream = activityStream
         self.activityContinuation = activityContinuation
+    }
+
+    deinit {
+        logger.info("CaptureService: deinit")
     }
 
     // MARK: - Authorization
