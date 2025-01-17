@@ -5,7 +5,6 @@ Abstract:
 A sample app that shows how to a use the AVFoundation capture APIs to perform media capture.
 */
 
-import os
 import SwiftUI
 
 @main
@@ -21,6 +20,3 @@ struct AVCamApp: App {
         }
     }
 }
-
-/// A global logger for the app.
-let logger = Logger()

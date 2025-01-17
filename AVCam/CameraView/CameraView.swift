@@ -75,29 +75,27 @@ struct CameraView: View {
                 guard !Camera.isPreview else { return }
                 // Start the capture pipeline.
                 await camera.start()
-                Task {
-                    // Listen to capture events
-                    for await activity in camera.activityStream {
-                        switch activity {
-                            case .willCapture:
+                // Listen to capture events
+                for await activity in camera.activityStream {
+                    switch activity {
+                        case .willCapture:
+                            withAnimation(.linear(duration: 0.05)) {
+                                blink = true
+                            } completion: {
                                 withAnimation(.linear(duration: 0.05)) {
-                                    blink = true
-                                } completion: {
-                                    withAnimation(.linear(duration: 0.05)) {
-                                        blink = false
-                                    }
+                                    blink = false
                                 }
+                            }
 
-                            case .didCapture(let uiImage):
-                                withAnimation(.linear(duration: 0.1)) {
-                                    capturedImage = uiImage
-                                }
+                        case .didCapture(let uiImage):
+                            withAnimation(.linear(duration: 0.1)) {
+                                capturedImage = uiImage
+                            }
 
-                            case .didImport(let uiImage):
-                                withAnimation(.linear(duration: 0.1)) {
-                                    capturedImage = uiImage
-                                }
-                        }
+                        case .didImport(let uiImage):
+                            withAnimation(.linear(duration: 0.1)) {
+                                capturedImage = uiImage
+                            }
                     }
                 }
             }

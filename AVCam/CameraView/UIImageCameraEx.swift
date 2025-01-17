@@ -22,7 +22,7 @@ extension UIImage {
         }
     }
 
-    func cropped(ratio: CGFloat) -> UIImage {
+    func cropped(ratio: CGFloat) -> UIImage? {
         // Start with an optimistic assumption that only the height should be changed
         var newWidth = size.width
         var newHeight: CGFloat = newWidth / ratio
@@ -39,12 +39,11 @@ extension UIImage {
         return cropped(CGRect(x: max(0, (size.width - newWidth) / 2), y: max(0, (size.height - newHeight) / 2), width: newWidth, height: newHeight))
     }
 
-    func cropped(_ cropFrame: CGRect) -> UIImage {
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
-        return UIGraphicsImageRenderer(size: cropFrame.size, format: format).image { _ in
-            draw(at: CGPoint(x: -cropFrame.origin.x, y: -cropFrame.origin.y))
-        }
+    func cropped(_ rect: CGRect) -> UIImage? {
+        // Flip the cropping rect for landscape orientations
+        let rect = [.left, .leftMirrored, .right, .rightMirrored].contains(imageOrientation) ? CGRect(x: rect.minY, y: rect.minX, width: rect.height, height: rect.width) : rect
+        // Somehow this method uses less memory than UIGraphicsImageRenderer, though orientation handling in this case is on us
+        return cgImage?.cropping(to: rect).map { UIImage(cgImage: $0, scale: scale, orientation: imageOrientation) }
     }
 
     func toJpeg() -> Data? {

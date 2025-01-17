@@ -33,24 +33,16 @@ final class Camera {
     /// A Boolean value that indicates whether the app is currently switching video devices.
     private(set) var isSwitchingVideoDevices = false
 
-    /// An error that indicates the details of an error during photo or movie capture.
-    private(set) var error: Error?
-
     /// An object that manages the app's capture functionality.
     private let captureService: CaptureService
 
     init(forSelfie: Bool = false) {
-        logger.info("Camera: init")
         self.captureService = CaptureService(forSelfie: forSelfie)
     }
 
     init(status: CameraStatus) { // for previews only
         self.status = status
         self.captureService = CaptureService(forSelfie: false)
-    }
-
-    deinit {
-        logger.info("Camera: deinit")
     }
 
     // MARK: - Starting the camera
@@ -68,7 +60,7 @@ final class Camera {
             try await captureService.start()
             status = .running
         } catch {
-            logger.error("Failed to start capture service. \(error)")
+            print("Failed to start capture service. \(error)")
             status = .failed
         }
     }

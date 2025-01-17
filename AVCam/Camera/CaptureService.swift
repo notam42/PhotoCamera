@@ -62,15 +62,10 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
     }
 
     init(forSelfie: Bool) {
-        logger.info("CaptureService: init")
         self.forSelfie = forSelfie
         let (activityStream, activityContinuation) = AsyncStream.makeStream(of: CaptureActivity.self)
         self.activityStream = activityStream
         self.activityContinuation = activityContinuation
-    }
-
-    deinit {
-        logger.info("CaptureService: deinit")
     }
 
     // MARK: - Authorization
@@ -279,23 +274,20 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
     func focusAndExpose(at point: CGPoint) {
         // The point this call receives is in view-space coordinates. Convert this point to device coordinates.
         let devicePoint = videoPreviewLayer.captureDevicePointConverted(fromLayerPoint: point)
-        do {
-            // Perform a user-initiated focus and expose.
-            try focusAndExpose(at: devicePoint, isUserInitiated: true)
-        } catch {
-            logger.debug("Unable to perform focus and exposure operation. \(error)")
-        }
+        // Perform a user-initiated focus and expose.
+        try? focusAndExpose(at: devicePoint, isUserInitiated: true)
     }
     
     // Observe notifications of type `subjectAreaDidChangeNotification` for the specified device.
     private func observeSubjectAreaChanges(of device: AVCaptureDevice) {
         // Cancel the previous observation task.
         subjectAreaChangeTask?.cancel()
-        subjectAreaChangeTask = Task {
+        subjectAreaChangeTask = Task { [weak self] in
             // Signal true when this notification occurs.
             for await _ in NotificationCenter.default.notifications(named: AVCaptureDevice.subjectAreaDidChangeNotification, object: device).compactMap({ _ in true }) {
+                guard let self else { return }
                 // Perform a system-initiated focus and expose.
-                try? focusAndExpose(at: CGPoint(x: 0.5, y: 0.5), isUserInitiated: false)
+                try? await focusAndExpose(at: CGPoint(x: 0.5, y: 0.5), isUserInitiated: false)
             }
         }
     }
@@ -369,11 +361,12 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
 
     /// Observe capture-related notifications.
     private func observeNotifications() {
-        Task {
+        Task { [weak self] in
             for await error in NotificationCenter.default.notifications(named: AVCaptureSession.runtimeErrorNotification)
                 .compactMap({ $0.userInfo?[AVCaptureSessionErrorKey] as? AVError }) {
                 // If the system resets media services, the capture session stops running.
                 if error.code == .mediaServicesWereReset {
+                    guard let self else { return }
                     if !captureSession.isRunning {
                         captureSession.startRunning()
                     }
@@ -391,8 +384,7 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
 
     nonisolated func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         if let error {
-            logger.error("Error capturing photo: \(error))")
-            return
+            print("Error capturing photo: \(error))")
         }
         guard let cgImage = photo.cgImageRepresentation(),
             let metadataOrientation = photo.metadata[String(kCGImagePropertyOrientation)] as? UInt32,
