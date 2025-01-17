@@ -146,6 +146,7 @@ struct CameraView: View {
                 .overlay {
                     if viewfinderShape == .round {
                         holeMask(width: width, height: height)
+                            .allowsHitTesting(false) // allow user-initiated focus/exposure taps
                     }
                 }
                 .clipped()
