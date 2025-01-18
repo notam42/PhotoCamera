@@ -24,9 +24,6 @@ public final class Camera {
     /// The app's capture session.
     public var captureSession: AVCaptureSession { captureService.captureSession }
 
-    /// The activity stream for indicating capture stages
-    public var activityStream: AsyncStream<CaptureActivity> { captureService.activityStream }
-
     /// The current status of the camera, such as unauthorized, running, or failed.
     public private(set) var status = CameraStatus.unknown
 
@@ -93,24 +90,15 @@ public final class Camera {
     // MARK: - Photo capture
     
     /// Captures a photo
-    public func capturePhoto() {
-        guard !Self.isPreview else { return }
-        Task {
-            // Note: even though the below call is async, it doesn't wait for completion of the capture. Use `activityStream` to monitor events in your UI.
-            await captureService.capturePhoto()
-        }
+    public func capturePhoto() async throws -> UIImage {
+        guard !Self.isPreview else { return UIImage() }
+        return try await captureService.capturePhoto()
     }
 
     /// Performs a focus and expose operation at the specified screen point.
     public func focusAndExpose(at point: CGPoint) async {
         guard !Self.isPreview else { return }
         await captureService.focusAndExpose(at: point)
-    }
-
-    // MARK: - Import image and pass it via the stream
-
-    public func importImage(data: Data) {
-        captureService.activityContinuation.yield(.didImport(uiImage: UIImage(data: data)))
     }
 
     public static let isPreview: Bool = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"

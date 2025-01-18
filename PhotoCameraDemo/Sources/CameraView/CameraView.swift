@@ -9,6 +9,7 @@ import SwiftUI
 import AVKit
 import UIKit.UIImage
 import PhotoCamera
+import PhotosUI
 
 enum ViewfinderShape {
     case round
@@ -25,6 +26,11 @@ enum ViewfinderShape {
     }
 }
 
+private let largeButtonSize = CGSize(width: 64, height: 64)
+private let toolbarHeight = 88.0
+private let maxToolbarWidth = 360.0
+private let captureButtonDimension = 68.0
+
 struct CameraView: View {
 
     @Environment(\.dismiss) private var dismiss
@@ -36,14 +42,13 @@ struct CameraView: View {
     @State private var blink: Bool = false // capture blink effect
     @State private var blurRadius = CGFloat.zero // camera switch blur effect
     @State private var capturedImage: UIImage? // result
-
+    @State private var libraryItem: PhotosPickerItem?
 
     init(forSelfie: Bool, viewfinderShape: ViewfinderShape, onConfirm: @escaping (UIImage?) -> Void) {
         self.camera = Camera(forSelfie: forSelfie)
         self.viewfinderShape = viewfinderShape
         self.onConfirm = onConfirm
     }
-
 
     var body: some View {
         GeometryReader { proxy in
@@ -60,7 +65,7 @@ struct CameraView: View {
                         // Handle capture events from device hardware buttons.
                         .onCameraCaptureEvent { event in
                             if event.phase == .ended {
-                                camera.capturePhoto()
+                                capturePhoto()
                             }
                         }
 
@@ -74,35 +79,7 @@ struct CameraView: View {
             .frame(maxWidth: .infinity)
 
             .task {
-                guard !Camera.isPreview else { return }
-                // Start the capture pipeline.
                 await camera.start()
-                // Listen to capture events
-                for await activity in camera.activityStream {
-                    switch activity {
-                        case .willCapture:
-                            withAnimation(.linear(duration: 0.05)) {
-                                blink = true
-                            } completion: {
-                                withAnimation(.linear(duration: 0.05)) {
-                                    blink = false
-                                }
-                            }
-
-                        case .didCapture(let uiImage):
-                            withAnimation(.linear(duration: 0.1)) {
-                                capturedImage = uiImage
-                            }
-
-                        case .didImport(let uiImage):
-                            withAnimation(.linear(duration: 0.1)) {
-                                capturedImage = uiImage
-                            }
-                            
-                        @unknown default:
-                            fatalError()
-                    }
-                }
             }
         }
 
@@ -131,6 +108,24 @@ struct CameraView: View {
                 Spacer()
             }
             Spacer()
+        }
+    }
+
+    // MARK: - Internal capture photo method
+
+    private func capturePhoto() {
+        Task {
+            // "Blink" the viewfinder as if it's the shutter
+            withAnimation(.linear(duration: 0.05)) {
+                blink = true
+            } completion: {
+                withAnimation(.linear(duration: 0.05)) {
+                    blink = false
+                }
+            }
+
+            // Do capture
+            capturedImage = try? await camera.capturePhoto()
         }
     }
 
@@ -203,15 +198,7 @@ struct CameraView: View {
                 Spacer()
                 stack(vertical: landscape) {
                     Spacer()
-                    CameraToolbar(vertical: landscape, camera: camera, showConfirmation: capturedImage != nil) { result in
-                        if result {
-                            dismiss()
-                            onConfirm(capturedImage?.cropped(ratio: viewfinderShape.ratio))
-                        }
-                        else {
-                            capturedImage = nil
-                        }
-                    }
+                    cameraToolbar(vertical: landscape)
                     Spacer()
                 }
                 .padding(landscape ? .trailing : .bottom, 28)
@@ -222,7 +209,130 @@ struct CameraView: View {
             }
         }
     }
+
+    // MARK: - Toolbar
+
+    private func cameraToolbar(vertical: Bool) -> some View {
+        stack(vertical: vertical) {
+            if capturedImage != nil {
+                retryButton()
+                Spacer()
+                confirmButton()
+            }
+            else {
+                photoPickerButton()
+                Spacer()
+                captureButton()
+                Spacer()
+                switchCameraButton()
+            }
+        }
+        .foregroundColor(.white)
+        .font(.system(size: 24, weight: .medium))
+        .frame(width: vertical ? toolbarHeight : nil, height: vertical ? nil : toolbarHeight)
+        .padding(vertical ? .vertical : .horizontal, 16)
+        .background(.ultraThinMaterial.opacity(0.4))
+        .cornerRadius(12)
+        .frame(maxWidth: vertical ? nil : maxToolbarWidth, maxHeight: vertical ? maxToolbarWidth : nil)
+    }
+
+    // MARK: - Confirm buttons
+
+    private func confirmButton() -> some View {
+        Button {
+            dismiss()
+            onConfirm(capturedImage?.cropped(ratio: viewfinderShape.ratio))
+        } label: {
+            Image(systemName: "checkmark")
+        }
+        .frame(width: largeButtonSize.width, height: largeButtonSize.height)
+    }
+
+    private func retryButton() -> some View {
+        Button {
+            capturedImage = nil
+        } label: {
+            Image(systemName: "arrow.uturn.left")
+        }
+        .frame(width: largeButtonSize.width, height: largeButtonSize.height)
+    }
+
+    // MARK: - Photo picker button
+
+    private func photoPickerButton() -> some View {
+        PhotosPicker(selection: $libraryItem, matching: .images, photoLibrary: .shared()) {
+            Image(systemName: "photo.on.rectangle")
+        }
+        .frame(width: largeButtonSize.width, height: largeButtonSize.height)
+        .onChange(of: libraryItem) {
+            if let libraryItem {
+                Task {
+                    if let data = try? await libraryItem.loadTransferable(type: Data.self) {
+                        capturedImage = UIImage(data: data)
+                    }
+                }
+            }
+            libraryItem = nil
+        }
+    }
+
+    // MARK: - Switch camera button
+
+    private func switchCameraButton() -> some View {
+        Button {
+            Task {
+                await camera.switchVideoDevices()
+            }
+        } label: {
+            Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.camera")
+        }
+        .frame(width: largeButtonSize.width, height: largeButtonSize.height)
+        .disabled(camera.isSwitchingVideoDevices)
+    }
+
+    // MARK: - Capture button
+
+    private func captureButton() -> some View {
+        ZStack {
+            let lineWidth = 4.0
+            Circle()
+                .stroke(lineWidth: lineWidth)
+                .fill(.white)
+            Button {
+                capturePhoto()
+            } label: {
+                Circle()
+                    .inset(by: lineWidth * 1.2)
+                    .fill(.white)
+            }
+            .buttonStyle(PhotoButtonStyle())
+        }
+        .frame(width: captureButtonDimension)
+    }
+
+    private struct PhotoButtonStyle: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .scaleEffect(configuration.isPressed ? 0.85 : 1.0)
+                .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
+        }
+    }
 }
+
+// MARK: - View.stack() extension
+
+private extension View {
+    @ViewBuilder
+    func stack<Content: View>(vertical: Bool, @ViewBuilder content: () -> Content) -> some View {
+        if vertical {
+            VStack(spacing: 0, content: content)
+        }
+        else {
+            HStack(spacing: 0, content: content)
+        }
+    }
+}
+
 
 // MARK: - Previews
 

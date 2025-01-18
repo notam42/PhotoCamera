@@ -9,33 +9,24 @@ import Foundation
 @preconcurrency import AVFoundation
 import UIKit.UIImage
 
-public enum CaptureActivity {
-    case willCapture
-    case didCapture(uiImage: UIImage?)
-    case didImport(uiImage: UIImage?)
-}
-
 public enum CameraError: Error {
     case videoDeviceUnavailable
     case addInputFailed
     case addOutputFailed
     case setupFailed
     case deviceChangeFailed
+    case photoCaptureFailed
 }
 
 /// An actor that manages the capture pipeline, which includes the capture session, device inputs, and capture outputs.
 /// The app defines it as an `actor` type to ensure that all camera operations happen off of the `@MainActor`.
-actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
+actor CaptureService {
 
     /// The app's capture session.
     nonisolated let captureSession = AVCaptureSession()
 
-    /// A stream of capture activity values that indicate the current state of progress.
-    let activityStream: AsyncStream<CaptureActivity>
-    let activityContinuation: AsyncStream<CaptureActivity>.Continuation
-
     /// The capture output type for this service.
-    let output = AVCapturePhotoOutput()
+    private let output = AVCapturePhotoOutput()
 
     /// Whether to use the front camera first
     private let forSelfie: Bool
@@ -49,13 +40,13 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
     /// An object that monitors video device rotations.
     private var rotationCoordinator: AVCaptureDevice.RotationCoordinator!
     private var rotationObservers = [AnyObject]()
-    
+
     /// A Boolean value that indicates whether the actor finished its required configuration.
     private var isSetUp = false
 
     /// A serial dispatch queue to use for capture control actions.
     private let sessionQueue = DispatchSerialQueue(label: "com.melikyan.CameraView")
-    
+
     /// Sets the session queue as the actor's executor.
     nonisolated var unownedExecutor: UnownedSerialExecutor {
         sessionQueue.asUnownedSerialExecutor()
@@ -63,11 +54,8 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
 
     init(forSelfie: Bool) {
         self.forSelfie = forSelfie
-        let (activityStream, activityContinuation) = AsyncStream.makeStream(of: CaptureActivity.self)
-        self.activityStream = activityStream
-        self.activityContinuation = activityContinuation
     }
-    
+
     // MARK: - Capture session life cycle
     func start() async throws {
         // Exit early if not authorized or the session is already running.
@@ -76,7 +64,7 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
         try setUpSession()
         captureSession.startRunning()
     }
-    
+
     // MARK: - Capture setup
     // Performs the initial capture session configuration.
     private func setUpSession() throws {
@@ -104,7 +92,7 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
             observeSubjectAreaChanges(of: defaultCamera)
             // Update the service's advertised capabilities.
             updateCaptureCapabilities()
-            
+
             isSetUp = true
         } catch {
             throw CameraError.setupFailed
@@ -122,7 +110,7 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
         }
         return input
     }
-    
+
     // Adds an output to the capture session to connect the specified capture device, if allowed.
     private func addOutput(_ output: AVCaptureOutput) throws {
         if captureSession.canAddOutput(output) {
@@ -131,7 +119,7 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
             throw CameraError.addOutputFailed
         }
     }
-    
+
     // The device for the active video input.
     private var currentDevice: AVCaptureDevice {
         guard let device = activeVideoInput?.device else {
@@ -141,7 +129,7 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
     }
 
     // MARK: - Device selection
-    
+
     /// Changes the capture device that provides video input.
     ///
     /// The app calls this method in response to the user tapping the button in the UI to change cameras.
@@ -159,25 +147,25 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
         if nextIndex == videoDevices.endIndex {
             nextIndex = 0
         }
-        
+
         let nextDevice = videoDevices[nextIndex]
         // Change the session's active capture device.
         changeCaptureDevice(to: nextDevice)
-        
+
         // The app only calls this method in response to the user requesting to switch cameras.
         // Set the new selection as the user's preferred camera.
         AVCaptureDevice.userPreferredCamera = nextDevice
     }
-    
+
     // Changes the device the service uses for video capture.
     private func changeCaptureDevice(to device: AVCaptureDevice) {
         // The service must have a valid video input prior to calling this method.
         guard let currentInput = activeVideoInput else { fatalError() }
-        
+
         // Bracket the following configuration in a begin/commit configuration pair.
         captureSession.beginConfiguration()
         defer { captureSession.commitConfiguration() }
-        
+
         // Remove the existing video input before attempting to connect a new one.
         captureSession.removeInput(currentInput)
         do {
@@ -196,19 +184,19 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
     }
 
     // MARK: - Rotation handling
-    
+
     /// Create a new rotation coordinator for the specified device and observe its state to monitor rotation changes.
     private func createRotationCoordinator(for device: AVCaptureDevice) {
         // Create a new rotation coordinator for this device.
         rotationCoordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: videoPreviewLayer)
-        
+
         // Set initial rotation state on the preview and output connections.
         updatePreviewRotation(rotationCoordinator.videoRotationAngleForHorizonLevelPreview)
         updateCaptureRotation(rotationCoordinator.videoRotationAngleForHorizonLevelCapture)
-        
+
         // Cancel previous observations.
         rotationObservers.removeAll()
-        
+
         // Add observers to monitor future changes.
         rotationObservers.append(
             rotationCoordinator.observe(\.videoRotationAngleForHorizonLevelPreview, options: .new) { [weak self] _, change in
@@ -217,7 +205,7 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
                 Task { await self.updatePreviewRotation(angle) }
             }
         )
-        
+
         rotationObservers.append(
             rotationCoordinator.observe(\.videoRotationAngleForHorizonLevelCapture, options: .new) { [weak self] _, change in
                 guard let self, let angle = change.newValue else { return }
@@ -226,7 +214,7 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
             }
         )
     }
-    
+
     private func updatePreviewRotation(_ angle: CGFloat) {
         let previewLayer = videoPreviewLayer
         Task { @MainActor in
@@ -234,12 +222,12 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
             previewLayer.connection?.videoRotationAngle = angle
         }
     }
-    
+
     private func updateCaptureRotation(_ angle: CGFloat) {
         // Set the rotation angle on the output object's video connection.
         output.connection(with: .video)?.videoRotationAngle = angle
     }
-    
+
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer {
         // Access the capture session's connected preview layer.
         guard let previewLayer = captureSession.connections.compactMap({ $0.videoPreviewLayer }).first else {
@@ -247,9 +235,9 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
         }
         return previewLayer
     }
-    
+
     // MARK: - Automatic focus and exposure
-    
+
     /// Performs a one-time automatic focus and expose operation.
     ///
     /// The app calls this method as the result of a person tapping on the preview area.
@@ -259,7 +247,7 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
         // Perform a user-initiated focus and expose.
         try? focusAndExpose(at: devicePoint, isUserInitiated: true)
     }
-    
+
     // Observe notifications of type `subjectAreaDidChangeNotification` for the specified device.
     private func observeSubjectAreaChanges(of device: AVCaptureDevice) {
         // Cancel the previous observation task.
@@ -274,20 +262,20 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
         }
     }
     private var subjectAreaChangeTask: Task<Void, Never>?
-    
+
     private func focusAndExpose(at devicePoint: CGPoint, isUserInitiated: Bool) throws {
         // Configure the current device.
         let device = currentDevice
-        
+
         // The following mode and point of interest configuration requires obtaining an exclusive lock on the device.
         try device.lockForConfiguration()
-        
+
         let focusMode = isUserInitiated ? AVCaptureDevice.FocusMode.autoFocus : .continuousAutoFocus
         if device.isFocusPointOfInterestSupported && device.isFocusModeSupported(focusMode) {
             device.focusPointOfInterest = devicePoint
             device.focusMode = focusMode
         }
-        
+
         let exposureMode = isUserInitiated ? AVCaptureDevice.ExposureMode.autoExpose : .continuousAutoExposure
         if device.isExposurePointOfInterestSupported && device.isExposureModeSupported(exposureMode) {
             device.exposurePointOfInterest = devicePoint
@@ -297,35 +285,9 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
         // If this method enables change monitoring, when the device's subject area changes, the app calls this method a
         // second time and resets the device to continuous automatic focus and exposure.
         device.isSubjectAreaChangeMonitoringEnabled = isUserInitiated
-        
+
         // Release the lock.
         device.unlockForConfiguration()
-    }
-    
-    // MARK: - Photo capture
-
-    func capturePhoto() {
-        // Create a new settings object to configure the photo capture.
-        var photoSettings = AVCapturePhotoSettings()
-
-        // Capture photos in HEIF format when the device supports it.
-        if output.availablePhotoCodecTypes.contains(.hevc) {
-            photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
-        }
-
-        // Set the format of the preview image to capture. The `photoSettings` object returns the available
-        // preview format types in order of compatibility with the primary image.
-        if let previewPhotoPixelFormatType = photoSettings.availablePreviewPhotoPixelFormatTypes.first {
-            photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: previewPhotoPixelFormatType]
-        }
-
-        // Set the largest dimensions that the photo output supports.
-        // `CaptureService` automatically updates the photo output's `maxPhotoDimensions`
-        // when the capture pipeline changes.
-        photoSettings.maxPhotoDimensions = output.maxPhotoDimensions
-
-        // Capture a new photo with the specified settings.
-        output.capturePhoto(with: photoSettings, delegate: self)
     }
 
     // MARK: - Internal state management
@@ -357,25 +319,69 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
         }
     }
 
-    // MARK: - A photo capture delegate to process the captured photo.
+    // MARK: - Photo capture
 
-    nonisolated func photoOutput(_ output: AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
-        // Signal that a capture is beginning, so that the UI can flash the screen
-        activityContinuation.yield(.willCapture)
+    func capturePhoto() async throws -> UIImage {
+        // Create a new settings object to configure the photo capture.
+        var photoSettings = AVCapturePhotoSettings()
+
+        // Capture photos in HEIF format when the device supports it.
+        if output.availablePhotoCodecTypes.contains(.hevc) {
+            photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
+        }
+
+        // Set the format of the preview image to capture. The `photoSettings` object returns the available
+        // preview format types in order of compatibility with the primary image.
+        if let previewPhotoPixelFormatType = photoSettings.availablePreviewPhotoPixelFormatTypes.first {
+            photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: previewPhotoPixelFormatType]
+        }
+
+        // Set the largest dimensions that the photo output supports.
+        // `CaptureService` automatically updates the photo output's `maxPhotoDimensions`
+        // when the capture pipeline changes.
+        photoSettings.maxPhotoDimensions = output.maxPhotoDimensions
+
+        // Capture a new photo with the specified settings.
+        // The below continuation ensures that `delegate` is retained until the captured data is returned
+        let delegate = PhotoCaptureDelegate(output: output, settings: photoSettings)
+        return try await withCheckedThrowingContinuation { continuation in
+            delegate.capturePhoto(with: continuation)
+        }
+    }
+}
+
+
+// MARK: - A photo capture delegate to process the captured photo.
+
+private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
+
+    private let output: AVCapturePhotoOutput
+    private let settings: AVCapturePhotoSettings
+    private var continuation: CheckedContinuation<UIImage, Error>?
+
+    init(output: AVCapturePhotoOutput, settings: AVCapturePhotoSettings) {
+        self.output = output
+        self.settings = settings
     }
 
-    nonisolated func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+    func capturePhoto(with continuation: CheckedContinuation<UIImage, Error>) {
+        self.continuation = continuation
+        output.capturePhoto(with: settings, delegate: self)
+    }
+
+    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         if let error {
-            print("Error capturing photo: \(error))")
+            continuation?.resume(throwing: error)
+            return
         }
         guard let cgImage = photo.cgImageRepresentation(),
             let metadataOrientation = photo.metadata[String(kCGImagePropertyOrientation)] as? UInt32,
                 let cgImageOrientation = CGImagePropertyOrientation(rawValue: metadataOrientation) else {
-            activityContinuation.yield(.didCapture(uiImage: nil))
+            continuation?.resume(throwing: CameraError.photoCaptureFailed)
             return
         }
         let uiImage = UIImage(cgImage: cgImage, scale: 1, orientation: .from(cgImageOrientation))
-        activityContinuation.yield(.didCapture(uiImage: uiImage))
+        continuation?.resume(returning: uiImage)
     }
 }
 
