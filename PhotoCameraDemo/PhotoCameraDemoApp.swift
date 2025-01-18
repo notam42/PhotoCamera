@@ -8,8 +8,7 @@ A sample app that shows how to a use the AVFoundation capture APIs to perform me
 import SwiftUI
 
 @main
-/// The AVCam app's main entry point.
-struct AVCamApp: App {
+struct PhotoCameraDemoApp: App {
 
     // An indication of the scene's operational state.
     @Environment(\.scenePhase) var scenePhase

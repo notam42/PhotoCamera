@@ -14,7 +14,7 @@
 		C48091852BD584AD00753C4A /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48091832BD584AD00753C4A /* Camera.swift */; };
 		C4DFD84628C3ED3D005B74F0 /* StatusOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DFD84528C3ED3D005B74F0 /* StatusOverlayView.swift */; };
 		C4E15AAF2898620E00827683 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E15AAE2898620E00827683 /* CameraView.swift */; };
-		C4F82C9D285ADDA2005D427A /* AVCamApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F82C9C285ADDA2005D427A /* AVCamApp.swift */; };
+		C4F82C9D285ADDA2005D427A /* PhotoCameraDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F82C9C285ADDA2005D427A /* PhotoCameraDemoApp.swift */; };
 		C4F82CA1285ADDA3005D427A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4F82CA0285ADDA3005D427A /* Assets.xcassets */; };
 		C4F82CCC285AE206005D427A /* CaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F82CCB285AE206005D427A /* CaptureService.swift */; };
 		C4F82CCE285AE233005D427A /* ViewfinderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F82CCD285AE233005D427A /* ViewfinderView.swift */; };
@@ -52,8 +52,8 @@
 		C4C6E1FE2CA1CF250081A8EA /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		C4DFD84528C3ED3D005B74F0 /* StatusOverlayView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusOverlayView.swift; sourceTree = "<group>"; };
 		C4E15AAE2898620E00827683 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; usesTabs = 0; };
-		C4F82C99285ADDA2005D427A /* AVCam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AVCam.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4F82C9C285ADDA2005D427A /* AVCamApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVCamApp.swift; sourceTree = "<group>"; usesTabs = 0; };
+		C4F82C99285ADDA2005D427A /* PhotoCameraDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhotoCameraDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4F82C9C285ADDA2005D427A /* PhotoCameraDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCameraDemoApp.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4F82CA0285ADDA3005D427A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C4F82CCB285AE206005D427A /* CaptureService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaptureService.swift; sourceTree = "<group>"; usesTabs = 0; };
 		C4F82CCD285AE233005D427A /* ViewfinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewfinderView.swift; sourceTree = "<group>"; usesTabs = 0; };
@@ -103,7 +103,7 @@
 		C4F82C90285ADDA2005D427A = {
 			isa = PBXGroup;
 			children = (
-				C4F82C9B285ADDA2005D427A /* AVCam */,
+				C4F82C9B285ADDA2005D427A /* PhotoCameraDemo */,
 				C4C6E1FB2CA1CF250081A8EA /* Frameworks */,
 				C4F82C9A285ADDA2005D427A /* Products */,
 			);
@@ -112,30 +112,30 @@
 		C4F82C9A285ADDA2005D427A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C4F82C99285ADDA2005D427A /* AVCam.app */,
+				C4F82C99285ADDA2005D427A /* PhotoCameraDemo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		C4F82C9B285ADDA2005D427A /* AVCam */ = {
+		C4F82C9B285ADDA2005D427A /* PhotoCameraDemo */ = {
 			isa = PBXGroup;
 			children = (
 				C47390512BC3464500EC7B9D /* Camera */,
 				36CA473C2D37B39D00D10E73 /* CameraView */,
 				362043642D36D2B900C7DC36 /* MainDemoView.swift */,
-				C4F82C9C285ADDA2005D427A /* AVCamApp.swift */,
+				C4F82C9C285ADDA2005D427A /* PhotoCameraDemoApp.swift */,
 				C4F82CA0285ADDA3005D427A /* Assets.xcassets */,
 			);
-			path = AVCam;
+			path = PhotoCameraDemo;
 			sourceTree = "<group>";
 			usesTabs = 0;
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C4F82C98285ADDA2005D427A /* AVCam */ = {
+		C4F82C98285ADDA2005D427A /* PhotoCameraDemo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C4F82CBE285ADDA4005D427A /* Build configuration list for PBXNativeTarget "AVCam" */;
+			buildConfigurationList = C4F82CBE285ADDA4005D427A /* Build configuration list for PBXNativeTarget "PhotoCameraDemo" */;
 			buildPhases = (
 				C4F82C95285ADDA2005D427A /* Sources */,
 				C4F82C96285ADDA2005D427A /* Frameworks */,
@@ -147,9 +147,9 @@
 			);
 			dependencies = (
 			);
-			name = AVCam;
-			productName = AVCam;
-			productReference = C4F82C99285ADDA2005D427A /* AVCam.app */;
+			name = PhotoCameraDemo;
+			productName = PhotoCamera;
+			productReference = C4F82C99285ADDA2005D427A /* PhotoCameraDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -169,7 +169,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C4F82C94285ADDA2005D427A /* Build configuration list for PBXProject "AVCam" */;
+			buildConfigurationList = C4F82C94285ADDA2005D427A /* Build configuration list for PBXProject "PhotoCameraDemo" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -182,7 +182,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C4F82C98285ADDA2005D427A /* AVCam */,
+				C4F82C98285ADDA2005D427A /* PhotoCameraDemo */,
 			);
 		};
 /* End PBXProject section */
@@ -206,7 +206,7 @@
 				C48091852BD584AD00753C4A /* Camera.swift in Sources */,
 				C4F82CCE285AE233005D427A /* ViewfinderView.swift in Sources */,
 				C4F82CCC285AE206005D427A /* CaptureService.swift in Sources */,
-				C4F82C9D285ADDA2005D427A /* AVCamApp.swift in Sources */,
+				C4F82C9D285ADDA2005D427A /* PhotoCameraDemoApp.swift in Sources */,
 				C472D84F285BDFA60082244A /* CameraToolbar.swift in Sources */,
 				C4E15AAF2898620E00827683 /* CameraView.swift in Sources */,
 				C472D846285BBFA60082244A /* DeviceLookup.swift in Sources */,
@@ -372,17 +372,17 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.melikyan.CameraView;
+				PRODUCT_BUNDLE_IDENTIFIER = com.melikyan.PhotoCamera;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -414,24 +414,24 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.melikyan.CameraView;
+				PRODUCT_BUNDLE_IDENTIFIER = com.melikyan.PhotoCamera;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C4F82C94285ADDA2005D427A /* Build configuration list for PBXProject "AVCam" */ = {
+		C4F82C94285ADDA2005D427A /* Build configuration list for PBXProject "PhotoCameraDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C4F82CBC285ADDA4005D427A /* Debug */,
@@ -440,7 +440,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C4F82CBE285ADDA4005D427A /* Build configuration list for PBXNativeTarget "AVCam" */ = {
+		C4F82CBE285ADDA4005D427A /* Build configuration list for PBXNativeTarget "PhotoCameraDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C4F82CBF285ADDA4005D427A /* Debug */,
