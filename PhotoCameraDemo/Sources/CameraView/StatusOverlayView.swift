@@ -1,9 +1,8 @@
-/*
-See the LICENSE.txt file for this sample’s licensing information.
-
-Abstract:
-A view that presents a status message over the camera user interface.
-*/
+//
+//  StatusOverlayView.swift
+//
+//  Created by Hovik Melikyan on 15.01.25.
+//
 
 import SwiftUI
 import PhotoCamera

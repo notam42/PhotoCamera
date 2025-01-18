@@ -1,9 +1,8 @@
-/*
-See the LICENSE.txt file for this sample’s licensing information.
-
-Abstract:
-A view that presents a video preview of the captured content.
-*/
+//
+//  ViewfinderView.swift
+//
+//  Created by Hovik Melikyan on 15.01.25.
+//
 
 import SwiftUI
 import AVFoundation

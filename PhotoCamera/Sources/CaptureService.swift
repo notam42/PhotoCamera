@@ -1,9 +1,8 @@
-/*
-See the LICENSE.txt file for this sample’s licensing information.
-
-Abstract:
-An object that manages a capture session and its inputs and outputs.
-*/
+//
+//  CaptureService.swift
+//
+//  Created by Hovik Melikyan on 15.01.25.
+//
 
 import Foundation
 @preconcurrency import AVFoundation

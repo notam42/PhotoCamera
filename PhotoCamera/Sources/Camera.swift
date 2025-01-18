@@ -1,9 +1,8 @@
-/*
-See the LICENSE.txt file for this sample’s licensing information.
-
-Abstract:
-An object that provides the interface to the features of the camera.
-*/
+//
+//  Camera.swift
+//
+//  Created by Hovik Melikyan on 15.01.25.
+//
 
 @preconcurrency import AVFoundation
 import UIKit.UIImage

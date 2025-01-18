@@ -1,9 +1,8 @@
-/*
-See the LICENSE.txt file for this sample’s licensing information.
-
-Abstract:
-A sample app that shows how to a use the AVFoundation capture APIs to perform media capture.
-*/
+//
+//  PhotoCameraDemoApp.swift
+//
+//  Created by Hovik Melikyan on 15.01.25.
+//
 
 import SwiftUI
 

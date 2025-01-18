@@ -1,6 +1,5 @@
 //
 //  PhotoCamera.h
-//  PhotoCamera
 //
 //  Created by Hovik Melikyan on 18.01.25.
 //

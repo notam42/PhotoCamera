@@ -1,9 +1,8 @@
-/*
-See the LICENSE.txt file for this sample’s licensing information.
-
-Abstract:
-The main user interface for the sample app.
-*/
+//
+//  CameraView.swift
+//
+//  Created by Hovik Melikyan on 15.01.25.
+//
 
 import SwiftUI
 import AVKit

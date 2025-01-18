@@ -1,9 +1,8 @@
-/*
-See the LICENSE.txt file for this sample’s licensing information.
-
-Abstract:
-An object that retrieves camera devices.
-*/
+//
+//  DeviceLookup.swift
+//
+//  Created by Hovik Melikyan on 15.01.25.
+//
 
 import AVFoundation
 
