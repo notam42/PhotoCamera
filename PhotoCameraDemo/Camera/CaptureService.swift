@@ -67,29 +67,11 @@ actor CaptureService: NSObject, AVCapturePhotoCaptureDelegate {
         self.activityStream = activityStream
         self.activityContinuation = activityContinuation
     }
-
-    // MARK: - Authorization
-    /// A Boolean value that indicates whether a person authorizes this app to use
-    /// device cameras. If they haven't previously authorized the app, querying this
-    /// property prompts them for authorization.
-    var isAuthorized: Bool {
-        get async {
-            let status = AVCaptureDevice.authorizationStatus(for: .video)
-            // Determine whether a person previously authorized camera access.
-            var isAuthorized = status == .authorized
-            // If the system hasn't determined their authorization status,
-            // explicitly prompt them for approval.
-            if status == .notDetermined {
-                isAuthorized = await AVCaptureDevice.requestAccess(for: .video)
-            }
-            return isAuthorized
-        }
-    }
     
     // MARK: - Capture session life cycle
     func start() async throws {
         // Exit early if not authorized or the session is already running.
-        guard await isAuthorized, !captureSession.isRunning else { return }
+        guard !captureSession.isRunning else { return }
         // Configure the session and start it.
         try setUpSession()
         captureSession.startRunning()

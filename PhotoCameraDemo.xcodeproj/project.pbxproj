@@ -108,6 +108,7 @@
 				C4F82C9A285ADDA2005D427A /* Products */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 0;
 		};
 		C4F82C9A285ADDA2005D427A /* Products */ = {
 			isa = PBXGroup;
@@ -359,6 +360,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Photo Camera";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_NSCameraUsageDescription = "To capture photos and videos.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -401,6 +403,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Photo Camera";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_NSCameraUsageDescription = "To capture photos and videos.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

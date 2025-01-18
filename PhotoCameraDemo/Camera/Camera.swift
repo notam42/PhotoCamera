@@ -45,13 +45,28 @@ final class Camera {
         self.captureService = CaptureService(forSelfie: false)
     }
 
+    // MARK: - Authorization
+    /// A Boolean value that indicates whether a person authorizes this app to use
+    /// device cameras. If they haven't previously authorized the app, querying this
+    /// property prompts them for authorization.
+    static var isAuthorized: Bool {
+        get async {
+            let status = AVCaptureDevice.authorizationStatus(for: .video)
+            var isAuthorized = status == .authorized
+            if status == .notDetermined {
+                isAuthorized = await AVCaptureDevice.requestAccess(for: .video)
+            }
+            return isAuthorized
+        }
+    }
+
     // MARK: - Starting the camera
     /// Start the camera and begin the stream of data.
     func start() async {
         guard !Self.isPreview else { return }
 
         // Verify that the person authorizes the app to use device cameras.
-        guard await captureService.isAuthorized else {
+        guard await Self.isAuthorized else {
             status = .unauthorized
             return
         }
