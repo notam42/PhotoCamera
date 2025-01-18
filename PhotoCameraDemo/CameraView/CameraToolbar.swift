@@ -10,7 +10,8 @@ import UIKit.UIImage
 import PhotosUI
 
 private let largeButtonSize = CGSize(width: 64, height: 64)
-private let toolbarHeight = 80.0
+private let toolbarHeight = 88.0
+private let maxToolbarWidth = 360.0
 private let captureButtonDimension = 68.0
 
 
@@ -19,6 +20,7 @@ private let captureButtonDimension = 68.0
 /// A view that displays controls to capture, switch cameras, and view the last captured media item.
 struct CameraToolbar: View {
 
+    let vertical: Bool
     let camera: Camera
     let showConfirmation: Bool
     let onDone: (Bool) -> Void
@@ -26,7 +28,7 @@ struct CameraToolbar: View {
     @State private var libraryItem: PhotosPickerItem?
 
     var body: some View {
-        HStack {
+        stack(vertical: vertical) {
             if showConfirmation {
                 retryButton()
                 Spacer()
@@ -42,8 +44,11 @@ struct CameraToolbar: View {
         }
         .foregroundColor(.white)
         .font(.system(size: 24, weight: .medium))
-        .frame(height: toolbarHeight)
-        .padding(.horizontal)
+        .frame(width: vertical ? toolbarHeight : nil, height: vertical ? nil : toolbarHeight)
+        .padding(vertical ? .vertical : .horizontal, 16)
+        .background(.ultraThinMaterial.opacity(0.4))
+        .cornerRadius(12)
+        .frame(maxWidth: vertical ? nil : maxToolbarWidth, maxHeight: vertical ? maxToolbarWidth : nil)
     }
 
     // MARK: - Confirm buttons
@@ -127,14 +132,36 @@ struct CameraToolbar: View {
     }
 }
 
+extension View {
+    @ViewBuilder
+    func stack<Content: View>(vertical: Bool, @ViewBuilder content: () -> Content) -> some View {
+        if vertical {
+            VStack(spacing: 0, content: content)
+        }
+        else {
+            HStack(spacing: 0, content: content)
+        }
+    }
+}
+
 // MARK: - Preview
 
-#Preview("Capture") {
-    CameraToolbar(camera: Camera(), showConfirmation: false) { _ in }
+#Preview("Capture - Portrait") {
+    CameraToolbar(vertical: false, camera: Camera(), showConfirmation: false) { _ in }
         .background(.black)
 }
 
-#Preview("Preview") {
-    CameraToolbar(camera: Camera(), showConfirmation: true) { _ in }
+#Preview("Preview - Portrait") {
+    CameraToolbar(vertical: false, camera: Camera(), showConfirmation: true) { _ in }
+        .background(.black)
+}
+
+#Preview("Capture - Landscape") {
+    CameraToolbar(vertical: true, camera: Camera(), showConfirmation: false) { _ in }
+        .background(.black)
+}
+
+#Preview("Preview - Landscape") {
+    CameraToolbar(vertical: true, camera: Camera(), showConfirmation: true) { _ in }
         .background(.black)
 }

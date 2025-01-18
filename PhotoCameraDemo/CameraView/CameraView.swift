@@ -70,6 +70,7 @@ struct CameraView: View {
                         .opacity(blink ? 0 : 1)
                 }
             }
+            .frame(maxWidth: .infinity)
 
             .task {
                 guard !Camera.isPreview else { return }
@@ -113,7 +114,6 @@ struct CameraView: View {
     private func closeButton() -> some View {
         VStack(alignment: .trailing) {
             HStack {
-                Spacer()
                 Button {
                     dismiss()
                 } label: {
@@ -122,8 +122,9 @@ struct CameraView: View {
                 .frame(width: 44, height: 44)
                 .foregroundColor(.white)
                 .font(.system(size: 28))
-                .shadow(color: .black, radius: 3)
-                .padding(.horizontal)
+                .shadow(color: .black.opacity(0.5), radius: 3)
+                .padding(8)
+                Spacer()
             }
             Spacer()
         }
@@ -134,9 +135,15 @@ struct CameraView: View {
     private func viewfinderContainer(viewSize: CGSize, @ViewBuilder content: @escaping () -> some View) -> some View {
         VStack {
             let ratio = viewfinderShape.ratio
-            let width = viewSize.width
-            let height = width / ratio
-            Spacer()
+            let viewRatio = viewSize.width / viewSize.height
+            let landscape = viewRatio > ratio
+            let is916 = viewfinderShape == .rect9x16
+            let pad = is916 ? 0 : 16.0
+            let width = max(0, (landscape ? viewSize.height * ratio : viewSize.width) - pad * 2)
+            let height = max(0, (landscape ? viewSize.height : viewSize.width / ratio) - pad * 2)
+            if viewfinderShape != .rect9x16 {
+                Spacer()
+            }
             content()
                 .aspectRatio(ratio, contentMode: .fill)
                 .frame(width: width, height: height)
@@ -148,9 +155,11 @@ struct CameraView: View {
                     }
                 }
                 .clipped()
-                .offset(y: viewfinderYOffset())
+                .offset(y: viewfinderYOffset(landscape: landscape))
                 .onChange(of: camera.isSwitchingVideoDevices, updateBlurRadius(_:_:))
-            Spacer()
+            if viewfinderShape != .rect9x16 {
+                Spacer()
+            }
         }
     }
 
@@ -169,8 +178,9 @@ struct CameraView: View {
         return shape
     }
 
-    private func viewfinderYOffset() -> CGFloat {
-        [.round, .square, .rect3x4].contains(viewfinderShape) ? -80.0 / 2 : 0
+    private func viewfinderYOffset(landscape: Bool) -> CGFloat {
+        // Move smaller viewfinders up a little bit, only in portrait mode
+        !landscape && [.round, .square, .rect3x4].contains(viewfinderShape) ? -80.0 / 2 : 0
     }
 
     private func updateBlurRadius(_: Bool, _ isSwitching: Bool) {
@@ -182,24 +192,30 @@ struct CameraView: View {
     // MARK: - camera UI
 
     private func cameraUI() -> some View {
-        VStack {
-            Spacer()
-            CameraToolbar(camera: camera, showConfirmation: capturedImage != nil) { result in
-                if result {
-                    dismiss()
-                    onConfirm(capturedImage?.cropped(ratio: viewfinderShape.ratio))
+        GeometryReader { proxy in
+            let viewRatio = proxy.size.width / proxy.size.height
+            let landscape = viewRatio > viewfinderShape.ratio
+            stack(vertical: !landscape) {
+                Spacer()
+                stack(vertical: landscape) {
+                    Spacer()
+                    CameraToolbar(vertical: landscape, camera: camera, showConfirmation: capturedImage != nil) { result in
+                        if result {
+                            dismiss()
+                            onConfirm(capturedImage?.cropped(ratio: viewfinderShape.ratio))
+                        }
+                        else {
+                            capturedImage = nil
+                        }
+                    }
+                    Spacer()
                 }
-                else {
-                    capturedImage = nil
-                }
+                .padding(landscape ? .trailing : .bottom, 28)
             }
-            .background(.ultraThinMaterial.opacity(0.3))
-            .cornerRadius(12)
-            .padding(.bottom, 32)
-            .padding(.horizontal)
-        }
-        .overlay {
-            StatusOverlayView(status: camera.status)
+            .overlay {
+                StatusOverlayView(status: camera.status)
+                    .ignoresSafeArea()
+            }
         }
     }
 }
