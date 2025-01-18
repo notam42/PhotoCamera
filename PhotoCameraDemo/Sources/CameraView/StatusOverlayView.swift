@@ -6,6 +6,7 @@ A view that presents a status message over the camera user interface.
 */
 
 import SwiftUI
+import PhotoCamera
 
 /// A view that presents a status message over the camera user interface.
 struct StatusOverlayView: View {

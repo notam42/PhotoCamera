@@ -8,6 +8,7 @@ The main user interface for the sample app.
 import SwiftUI
 import AVKit
 import UIKit.UIImage
+import PhotoCamera
 
 enum ViewfinderShape {
     case round
@@ -97,6 +98,9 @@ struct CameraView: View {
                             withAnimation(.linear(duration: 0.1)) {
                                 capturedImage = uiImage
                             }
+                            
+                        @unknown default:
+                            fatalError()
                     }
                 }
             }

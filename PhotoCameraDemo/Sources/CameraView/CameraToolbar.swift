@@ -8,6 +8,7 @@
 import SwiftUI
 import UIKit.UIImage
 import PhotosUI
+import PhotoCamera
 
 private let largeButtonSize = CGSize(width: 64, height: 64)
 private let toolbarHeight = 88.0

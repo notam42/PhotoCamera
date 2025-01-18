@@ -9,13 +9,13 @@ import Foundation
 @preconcurrency import AVFoundation
 import UIKit.UIImage
 
-enum CaptureActivity {
+public enum CaptureActivity {
     case willCapture
     case didCapture(uiImage: UIImage?)
     case didImport(uiImage: UIImage?)
 }
 
-enum CameraError: Error {
+public enum CameraError: Error {
     case videoDeviceUnavailable
     case addInputFailed
     case addOutputFailed

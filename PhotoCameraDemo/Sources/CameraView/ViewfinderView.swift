@@ -7,6 +7,7 @@ A view that presents a video preview of the captured content.
 
 import SwiftUI
 import AVFoundation
+import PhotoCamera
 
 struct ViewfinderView: UIViewRepresentable {
     
