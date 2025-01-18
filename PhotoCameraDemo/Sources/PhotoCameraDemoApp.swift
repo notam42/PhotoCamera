@@ -1,0 +1,21 @@
+/*
+See the LICENSE.txt file for this sample’s licensing information.
+
+Abstract:
+A sample app that shows how to a use the AVFoundation capture APIs to perform media capture.
+*/
+
+import SwiftUI
+
+@main
+struct PhotoCameraDemoApp: App {
+
+    // An indication of the scene's operational state.
+    @Environment(\.scenePhase) var scenePhase
+    
+    var body: some Scene {
+        WindowGroup {
+            MainDemoView()
+        }
+    }
+}
