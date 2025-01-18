@@ -102,7 +102,7 @@ struct CameraView: View {
                 }
                 .frame(width: 44, height: 44)
                 .foregroundColor(.white)
-                .font(.system(size: 28))
+                .font(.system(size: 24))
                 .shadow(color: .black.opacity(0.5), radius: 3)
                 .padding(8)
                 Spacer()
@@ -231,7 +231,7 @@ struct CameraView: View {
         .font(.system(size: 24, weight: .medium))
         .frame(width: vertical ? toolbarHeight : nil, height: vertical ? nil : toolbarHeight)
         .padding(vertical ? .vertical : .horizontal, 16)
-        .background(.ultraThinMaterial.opacity(0.4))
+        .background(.ultraThinMaterial.opacity(0.3))
         .cornerRadius(12)
         .frame(maxWidth: vertical ? nil : maxToolbarWidth, maxHeight: vertical ? maxToolbarWidth : nil)
     }
