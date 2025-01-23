@@ -5,6 +5,7 @@
 //
 
 import Foundation
+import Combine
 @preconcurrency import AVFoundation
 import UIKit.UIImage
 
@@ -45,6 +46,12 @@ actor CaptureService {
 
     /// A serial dispatch queue to use for capture control actions.
     private let sessionQueue = DispatchSerialQueue(label: "com.melikyan.CameraView")
+
+    /// Cancel the async notification loops using this collection; internal.
+    private var cancellables = Set<AnyCancellable>()
+
+    /// In addition to `cancelables`, subject area change notifications should be reset every time an input device is changed.
+    private var subjectAreaChangeTask: Task<Void, Never>?
 
     /// Sets the session queue as the actor's executor.
     nonisolated var unownedExecutor: UnownedSerialExecutor {
@@ -251,7 +258,7 @@ actor CaptureService {
     private func observeSubjectAreaChanges(of device: AVCaptureDevice) {
         // Cancel the previous observation task.
         subjectAreaChangeTask?.cancel()
-        subjectAreaChangeTask = Task { [weak self] in
+        let task = Task { [weak self] in
             // Signal true when this notification occurs.
             for await _ in NotificationCenter.default.notifications(named: AVCaptureDevice.subjectAreaDidChangeNotification, object: device).compactMap({ _ in true }) {
                 guard let self else { return }
@@ -259,8 +266,11 @@ actor CaptureService {
                 try? await focusAndExpose(at: CGPoint(x: 0.5, y: 0.5), isUserInitiated: false)
             }
         }
+        subjectAreaChangeTask = task
+        AnyCancellable {
+            task.cancel()
+        }.store(in: &cancellables)
     }
-    private var subjectAreaChangeTask: Task<Void, Never>?
 
     private func focusAndExpose(at devicePoint: CGPoint, isUserInitiated: Bool) throws {
         // Configure the current device.
@@ -304,7 +314,7 @@ actor CaptureService {
 
     /// Observe capture-related notifications.
     private func observeNotifications() {
-        Task { [weak self] in
+        let task = Task { [weak self] in
             for await error in NotificationCenter.default.notifications(named: AVCaptureSession.runtimeErrorNotification)
                 .compactMap({ $0.userInfo?[AVCaptureSessionErrorKey] as? AVError }) {
                 // If the system resets media services, the capture session stops running.
@@ -316,6 +326,9 @@ actor CaptureService {
                 }
             }
         }
+        AnyCancellable {
+            task.cancel()
+        }.store(in: &cancellables)
     }
 
     // MARK: - Photo capture
