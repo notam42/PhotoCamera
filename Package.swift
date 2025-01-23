@@ -19,5 +19,6 @@ let package = Package(
             dependencies: [],
             path: "PhotoCamera/Sources"
         ),
-    ]
+    ],
+	swiftLanguageVersions: [.version("6")]
 )
