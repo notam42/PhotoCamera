@@ -10,21 +10,6 @@ import UIKit.UIImage
 import PhotoCamera
 import PhotosUI
 
-enum ViewfinderShape {
-    case round
-    case square
-    case rect3x4
-    case rect9x16
-
-    var ratio: CGFloat {
-        switch self {
-            case .round, .square: 1
-            case .rect3x4: 3.0 / 4
-            case .rect9x16: 9.0 / 16
-        }
-    }
-}
-
 private let largeButtonSize = CGSize(width: 64, height: 64)
 private let toolbarHeight = 88.0
 private let maxToolbarWidth = 360.0
@@ -34,7 +19,7 @@ struct CameraView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    let viewfinderShape: ViewfinderShape
+    let isRound: Bool
     let onConfirm: (UIImage?) -> Void
 
     @State private var camera: Camera
@@ -43,9 +28,9 @@ struct CameraView: View {
     @State private var capturedImage: UIImage? // result
     @State private var libraryItem: PhotosPickerItem?
 
-    init(forSelfie: Bool, viewfinderShape: ViewfinderShape, onConfirm: @escaping (UIImage?) -> Void) {
+    init(forSelfie: Bool, isRound: Bool, onConfirm: @escaping (UIImage?) -> Void) {
         self.camera = Camera(forSelfie: forSelfie)
-        self.viewfinderShape = viewfinderShape
+        self.isRound = isRound
         self.onConfirm = onConfirm
     }
 
@@ -132,22 +117,19 @@ struct CameraView: View {
 
     private func viewfinderContainer(viewSize: CGSize, @ViewBuilder content: @escaping () -> some View) -> some View {
         VStack {
-            let ratio = viewfinderShape.ratio
+            let ratio = 1.0
             let viewRatio = viewSize.width / viewSize.height
             let landscape = viewRatio > ratio
-            let is916 = viewfinderShape == .rect9x16
-            let pad = is916 ? 0 : 16.0
+            let pad = 16.0
             let width = max(0, (landscape ? viewSize.height * ratio : viewSize.width) - pad * 2)
             let height = max(0, (landscape ? viewSize.height : viewSize.width / ratio) - pad * 2)
-            if viewfinderShape != .rect9x16 {
-                Spacer()
-            }
+            Spacer()
             content()
                 .aspectRatio(ratio, contentMode: .fill)
                 .frame(width: width, height: height)
                 .blur(radius: blurRadius, opaque: true)
                 .overlay {
-                    if viewfinderShape == .round {
+                    if isRound {
                         holeMask(width: width, height: height)
                             .allowsHitTesting(false) // allow user-initiated focus/exposure taps
                     }
@@ -155,9 +137,7 @@ struct CameraView: View {
                 .clipped()
                 .offset(y: viewfinderYOffset(landscape: landscape))
                 .onChange(of: camera.isSwitchingVideoDevices, updateBlurRadius(_:_:))
-            if viewfinderShape != .rect9x16 {
-                Spacer()
-            }
+            Spacer()
         }
     }
 
@@ -178,7 +158,7 @@ struct CameraView: View {
 
     private func viewfinderYOffset(landscape: Bool) -> CGFloat {
         // Move smaller viewfinders up a little bit, only in portrait mode
-        !landscape && [.round, .square, .rect3x4].contains(viewfinderShape) ? -80.0 / 2 : 0
+        !landscape ? -80.0 / 2 : 0
     }
 
     private func updateBlurRadius(_: Bool, _ isSwitching: Bool) {
@@ -191,8 +171,9 @@ struct CameraView: View {
 
     private func cameraUI() -> some View {
         GeometryReader { proxy in
+            let ratio = 1.0
             let viewRatio = proxy.size.width / proxy.size.height
-            let landscape = viewRatio > viewfinderShape.ratio
+            let landscape = viewRatio > ratio
             stack(vertical: !landscape) {
                 Spacer()
                 stack(vertical: landscape) {
@@ -240,7 +221,7 @@ struct CameraView: View {
     private func confirmButton() -> some View {
         Button {
             dismiss()
-            onConfirm(capturedImage?.cropped(ratio: viewfinderShape.ratio))
+            onConfirm(capturedImage?.cropped(ratio: 1))
         } label: {
             Image(systemName: "checkmark")
         }
@@ -336,17 +317,9 @@ private extension View {
 // MARK: - Previews
 
 #Preview("Round") {
-    CameraView(forSelfie: true, viewfinderShape: .round) { _ in }
+    CameraView(forSelfie: true, isRound: true) { _ in }
 }
 
 #Preview("Square") {
-    CameraView(forSelfie: true, viewfinderShape: .square) { _ in }
-}
-
-#Preview("Rect3x4") {
-    CameraView(forSelfie: true, viewfinderShape: .rect3x4) { _ in }
-}
-
-#Preview("Rect9x16") {
-    CameraView(forSelfie: true, viewfinderShape: .rect9x16) { _ in }
+    CameraView(forSelfie: true, isRound: false) { _ in }
 }
