@@ -9,12 +9,13 @@ import AVFoundation
 
 struct MainDemoView: View {
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var isCameraPresented: Bool = false
     @State private var capturedImage: UIImage?
 
     var body: some View {
-        if verticalSizeClass == .regular {
+        if verticalSizeClass == .regular && horizontalSizeClass == .regular {
             main()
                 .sheet(isPresented: $isCameraPresented, content: cameraView)
         }

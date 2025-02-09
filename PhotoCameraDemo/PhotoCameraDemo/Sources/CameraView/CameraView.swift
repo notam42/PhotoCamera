@@ -16,7 +16,6 @@ private let maxToolbarWidth = 360.0
 private let captureButtonDimension = 68.0
 
 struct CameraView: View {
-
     @Environment(\.dismiss) private var dismiss
 
     private let title: String?
