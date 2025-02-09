@@ -59,7 +59,8 @@
 		3629A5DF2D58B36300754947 = {
 			isa = PBXGroup;
 			children = (
-				3629A5FA2D58B47100754947 /* PhotoCameraDemo */,
+				3629A5FC2D58B47900754947 /* Sources */,
+				3629A5F92D58B47100754947 /* Assets.xcassets */,
 				3629A5E92D58B36300754947 /* Products */,
 				3629A60A2D58B49D00754947 /* Frameworks */,
 			);
@@ -72,15 +73,6 @@
 				3629A5E82D58B36300754947 /* PhotoCameraDemo.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		3629A5FA2D58B47100754947 /* PhotoCameraDemo */ = {
-			isa = PBXGroup;
-			children = (
-				3629A5FC2D58B47900754947 /* Sources */,
-				3629A5F92D58B47100754947 /* Assets.xcassets */,
-			);
-			path = PhotoCameraDemo;
 			sourceTree = "<group>";
 		};
 		3629A5FC2D58B47900754947 /* Sources */ = {
