@@ -8,11 +8,25 @@ import SwiftUI
 import AVFoundation
 
 struct MainDemoView: View {
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var isCameraPresented: Bool = false
     @State private var capturedImage: UIImage?
 
     var body: some View {
+        if verticalSizeClass == .regular && horizontalSizeClass == .regular {
+            main()
+                .sheet(isPresented: $isCameraPresented, content: cameraView)
+        }
+        else {
+            main()
+                .fullScreenCover(isPresented: $isCameraPresented, content: cameraView)
+        }
+    }
+
+
+    private func main() -> some View {
         VStack {
             ZStack {
                 Rectangle()
@@ -43,10 +57,12 @@ struct MainDemoView: View {
             }
             .padding(.bottom)
         }
-        .fullScreenCover(isPresented: $isCameraPresented) {
-            CameraView(forSelfie: true, isRound: true) { image in
-                capturedImage = image?.fitted(maxWidth: 500)
-            }
+    }
+
+
+    private func cameraView() -> some View {
+        CameraView(title: "Take a selfie", forSelfie: true, isRound: true) { image in
+            capturedImage = image?.fitted(maxWidth: 500)
         }
     }
 }

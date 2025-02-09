@@ -16,11 +16,11 @@ private let maxToolbarWidth = 360.0
 private let captureButtonDimension = 68.0
 
 struct CameraView: View {
-
     @Environment(\.dismiss) private var dismiss
 
-    let isRound: Bool
-    let onConfirm: (UIImage?) -> Void
+    private let title: String?
+    private let isRound: Bool
+    private let onConfirm: (UIImage?) -> Void
 
     @State private var camera: Camera
     @State private var blink: Bool = false // capture blink effect
@@ -28,7 +28,8 @@ struct CameraView: View {
     @State private var capturedImage: UIImage? // result
     @State private var libraryItem: PhotosPickerItem?
 
-    init(forSelfie: Bool, isRound: Bool, onConfirm: @escaping (UIImage?) -> Void) {
+    init(title: String?, forSelfie: Bool, isRound: Bool, onConfirm: @escaping (UIImage?) -> Void) {
+		self.title = title
         self.camera = Camera(forSelfie: forSelfie)
         self.isRound = isRound
         self.onConfirm = onConfirm
@@ -38,27 +39,29 @@ struct CameraView: View {
         GeometryReader { proxy in
             // A container view that manages the placement of the preview.
             viewfinderContainer(viewSize: proxy.size) {
-                // A view that provides a preview of the captured content.
-                if let capturedImage {
-                    Image(uiImage: capturedImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                }
-                else {
-                    ViewfinderView(camera: camera)
-                        // Handle capture events from device hardware buttons.
-                        .onCameraCaptureEvent { event in
-                            if event.phase == .ended {
-                                capturePhoto()
-                            }
+                ViewfinderView(camera: camera)
+                    // Handle capture events from device hardware buttons.
+                    .onCameraCaptureEvent { event in
+                        if event.phase == .ended {
+                            capturePhoto()
                         }
+                    }
 
-                        // Focus and expose at the tapped point.
-                        .onTapGesture { location in
-                            Task { await camera.focusAndExpose(at: location) }
+                    // Focus and expose at the tapped point.
+                    .onTapGesture { location in
+                        Task { await camera.focusAndExpose(at: location) }
+                    }
+                    .opacity(blink ? 0 : 1)
+
+                    // A view that provides a preview of the captured content.
+                    .overlay {
+                        // This is done as an overlay because hiding and showing the video layer (ViewfinderView above) without restarting the session causes strange problems on macOS, though is fine on the iPhone.
+                        if let capturedImage {
+                            Image(uiImage: capturedImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
                         }
-                        .opacity(blink ? 0 : 1)
-                }
+                    }
             }
             .frame(maxWidth: .infinity)
 
@@ -66,13 +69,23 @@ struct CameraView: View {
                 await camera.start()
             }
         }
+        .padding(.vertical, title == nil ? 0 : 60) // make room for the title if present
 
         .statusBarHidden(true)
         .background(.black)
         .ignoresSafeArea() // order is important
         .overlay {
-            cameraUI()
             closeButton()
+            if let title {
+                VStack {
+                    Text(title)
+                        .font(.title2)
+                        .foregroundStyle(.white)
+                        .padding(12)
+                    Spacer()
+                }
+            }
+            cameraUI()
         }
     }
 
@@ -117,15 +130,11 @@ struct CameraView: View {
 
     private func viewfinderContainer(viewSize: CGSize, @ViewBuilder content: @escaping () -> some View) -> some View {
         VStack {
-            let ratio = 1.0
-            let viewRatio = viewSize.width / viewSize.height
-            let landscape = viewRatio > ratio
-            let pad = 16.0
-            let width = max(0, (landscape ? viewSize.height * ratio : viewSize.width) - pad * 2)
-            let height = max(0, (landscape ? viewSize.height : viewSize.width / ratio) - pad * 2)
+            let width = max(0, min(viewSize.width, viewSize.height) - 16 * 2)
+            let height = width
             Spacer()
             content()
-                .aspectRatio(ratio, contentMode: .fill)
+                .aspectRatio(1.0, contentMode: .fill)
                 .frame(width: width, height: height)
                 .blur(radius: blurRadius, opaque: true)
                 .overlay {
@@ -135,7 +144,6 @@ struct CameraView: View {
                     }
                 }
                 .clipped()
-                .offset(y: viewfinderYOffset(landscape: landscape))
                 .onChange(of: camera.isSwitchingVideoDevices, updateBlurRadius(_:_:))
             Spacer()
         }
@@ -156,11 +164,6 @@ struct CameraView: View {
         return shape
     }
 
-    private func viewfinderYOffset(landscape: Bool) -> CGFloat {
-        // Move smaller viewfinders up a little bit, only in portrait mode
-        !landscape ? -80.0 / 2 : 0
-    }
-
     private func updateBlurRadius(_: Bool, _ isSwitching: Bool) {
         withAnimation {
             blurRadius = isSwitching ? 30 : 0
@@ -171,9 +174,7 @@ struct CameraView: View {
 
     private func cameraUI() -> some View {
         GeometryReader { proxy in
-            let ratio = 1.0
-            let viewRatio = proxy.size.width / proxy.size.height
-            let landscape = viewRatio > ratio
+            let landscape = proxy.size.width > proxy.size.height
             stack(vertical: !landscape) {
                 Spacer()
                 stack(vertical: landscape) {
@@ -317,9 +318,9 @@ private extension View {
 // MARK: - Previews
 
 #Preview("Round") {
-    CameraView(forSelfie: true, isRound: true) { _ in }
+    CameraView(title: "Take a selfie", forSelfie: true, isRound: true) { _ in }
 }
 
 #Preview("Square") {
-    CameraView(forSelfie: true, isRound: false) { _ in }
+    CameraView(title: "Take a selfie", forSelfie: true, isRound: false) { _ in }
 }

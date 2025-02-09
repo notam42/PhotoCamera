@@ -193,6 +193,9 @@ actor CaptureService {
 
     /// Create a new rotation coordinator for the specified device and observe its state to monitor rotation changes.
     private func createRotationCoordinator(for device: AVCaptureDevice) {
+        // Somehow this function doesn't work correctly on the Mac, apparently it doesn't need rotation correction. Plus it doesn't need to since it's a Mac.
+        guard !ProcessInfo.processInfo.isiOSAppOnMac else { return }
+
         // Create a new rotation coordinator for this device.
         rotationCoordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: videoPreviewLayer)
 
