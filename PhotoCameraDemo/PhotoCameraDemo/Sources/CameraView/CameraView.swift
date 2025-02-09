@@ -68,6 +68,7 @@ struct CameraView: View {
                 await camera.start()
             }
         }
+        .padding(.vertical, title == nil ? 0 : 60) // make room for the title if present
 
         .statusBarHidden(true)
         .background(.black)
@@ -128,15 +129,11 @@ struct CameraView: View {
 
     private func viewfinderContainer(viewSize: CGSize, @ViewBuilder content: @escaping () -> some View) -> some View {
         VStack {
-            let ratio = 1.0
-            let viewRatio = viewSize.width / viewSize.height
-            let landscape = viewRatio > ratio
-            let pad = 16.0
-            let width = max(0, (landscape ? viewSize.height * ratio : viewSize.width) - pad * 2)
-            let height = max(0, (landscape ? viewSize.height : viewSize.width / ratio) - pad * 2)
+            let width = max(0, min(viewSize.width, viewSize.height) - 16 * 2)
+            let height = width
             Spacer()
             content()
-                .aspectRatio(ratio, contentMode: .fill)
+                .aspectRatio(1.0, contentMode: .fill)
                 .frame(width: width, height: height)
                 .blur(radius: blurRadius, opaque: true)
                 .overlay {
@@ -146,7 +143,6 @@ struct CameraView: View {
                     }
                 }
                 .clipped()
-                .offset(y: viewfinderYOffset(landscape: landscape))
                 .onChange(of: camera.isSwitchingVideoDevices, updateBlurRadius(_:_:))
             Spacer()
         }
@@ -167,11 +163,6 @@ struct CameraView: View {
         return shape
     }
 
-    private func viewfinderYOffset(landscape: Bool) -> CGFloat {
-        // Move smaller viewfinders up a little bit, only in portrait mode
-        !landscape ? -80.0 / 2 : 0
-    }
-
     private func updateBlurRadius(_: Bool, _ isSwitching: Bool) {
         withAnimation {
             blurRadius = isSwitching ? 30 : 0
@@ -182,9 +173,7 @@ struct CameraView: View {
 
     private func cameraUI() -> some View {
         GeometryReader { proxy in
-            let ratio = 1.0
-            let viewRatio = proxy.size.width / proxy.size.height
-            let landscape = viewRatio > ratio
+            let landscape = proxy.size.width > proxy.size.height
             stack(vertical: !landscape) {
                 Spacer()
                 stack(vertical: landscape) {
