@@ -44,7 +44,7 @@ struct MainDemoView: View {
             .padding(.bottom)
         }
         .fullScreenCover(isPresented: $isCameraPresented) {
-            CameraView(forSelfie: true, isRound: true) { image in
+            CameraView(title: "Take a selfie", forSelfie: true, isRound: true) { image in
                 capturedImage = image?.fitted(maxWidth: 500)
             }
         }

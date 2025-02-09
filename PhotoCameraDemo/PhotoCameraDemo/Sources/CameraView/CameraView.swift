@@ -19,8 +19,9 @@ struct CameraView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    let isRound: Bool
-    let onConfirm: (UIImage?) -> Void
+    private let title: String?
+    private let isRound: Bool
+    private let onConfirm: (UIImage?) -> Void
 
     @State private var camera: Camera
     @State private var blink: Bool = false // capture blink effect
@@ -28,7 +29,8 @@ struct CameraView: View {
     @State private var capturedImage: UIImage? // result
     @State private var libraryItem: PhotosPickerItem?
 
-    init(forSelfie: Bool, isRound: Bool, onConfirm: @escaping (UIImage?) -> Void) {
+    init(title: String?, forSelfie: Bool, isRound: Bool, onConfirm: @escaping (UIImage?) -> Void) {
+		self.title = title
         self.camera = Camera(forSelfie: forSelfie)
         self.isRound = isRound
         self.onConfirm = onConfirm
@@ -71,8 +73,17 @@ struct CameraView: View {
         .background(.black)
         .ignoresSafeArea() // order is important
         .overlay {
-            cameraUI()
             closeButton()
+            if let title {
+                VStack {
+                    Text(title)
+                        .font(.title2)
+                        .foregroundStyle(.white)
+                        .padding(12)
+                    Spacer()
+                }
+            }
+            cameraUI()
         }
     }
 
@@ -317,9 +328,9 @@ private extension View {
 // MARK: - Previews
 
 #Preview("Round") {
-    CameraView(forSelfie: true, isRound: true) { _ in }
+    CameraView(title: "Take a selfie", forSelfie: true, isRound: true) { _ in }
 }
 
 #Preview("Square") {
-    CameraView(forSelfie: true, isRound: false) { _ in }
+    CameraView(title: "Take a selfie", forSelfie: true, isRound: false) { _ in }
 }
