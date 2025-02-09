@@ -39,27 +39,29 @@ struct CameraView: View {
         GeometryReader { proxy in
             // A container view that manages the placement of the preview.
             viewfinderContainer(viewSize: proxy.size) {
-                // A view that provides a preview of the captured content.
-                if let capturedImage {
-                    Image(uiImage: capturedImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                }
-                else {
-                    ViewfinderView(camera: camera)
-                        // Handle capture events from device hardware buttons.
-                        .onCameraCaptureEvent { event in
-                            if event.phase == .ended {
-                                capturePhoto()
-                            }
+                ViewfinderView(camera: camera)
+                    // Handle capture events from device hardware buttons.
+                    .onCameraCaptureEvent { event in
+                        if event.phase == .ended {
+                            capturePhoto()
                         }
+                    }
 
-                        // Focus and expose at the tapped point.
-                        .onTapGesture { location in
-                            Task { await camera.focusAndExpose(at: location) }
+                    // Focus and expose at the tapped point.
+                    .onTapGesture { location in
+                        Task { await camera.focusAndExpose(at: location) }
+                    }
+                    .opacity(blink ? 0 : 1)
+
+                    // A view that provides a preview of the captured content.
+                    .overlay {
+                        // This is done as an overlay because hiding and showing the video layer (ViewfinderView above) without restarting the session causes strange problems on macOS, though is fine on the iPhone.
+                        if let capturedImage {
+                            Image(uiImage: capturedImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
                         }
-                        .opacity(blink ? 0 : 1)
-                }
+                    }
             }
             .frame(maxWidth: .infinity)
 
