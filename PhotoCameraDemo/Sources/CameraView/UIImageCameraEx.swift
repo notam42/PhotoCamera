@@ -11,7 +11,7 @@ extension UIImage {
     func fitted(maxWidth: CGFloat) -> UIImage? {
         guard size.width > 0, size.height > 0 else { return nil }
         let scale = maxWidth / size.width
-        guard scale >= 1 else {
+        guard scale < 1 else {
             return self
         }
         let newSize = CGSize(width: size.width * scale, height: size.height * scale)
