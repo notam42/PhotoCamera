@@ -427,26 +427,39 @@ actor CaptureService {
   /// This method is called when changing devices to ensure zoom capabilities are always up-to-date.
   private func updateOpticalZoomCapabilities() {
       let device = currentDevice
-      
-      // Reset current zoom factor when changing devices
-      currentZoomFactor = 1.0
-      
-      // Get the device's zoom capabilities
       var opticalZoomFactors = [CGFloat]()
-      
-      // Always add 1.0 as the default zoom level
-    opticalZoomFactors.append(1.0)
-      
-      // Check for optical zoom levels (if available)
-      if #available(iOS 15.0, *) {
-          // On newer iOS devices, we can get the supported zoom factors directly
-        opticalZoomFactors.append(contentsOf: device.virtualDeviceSwitchOverVideoZoomFactors.map { CGFloat(truncating: $0) })
+
+      // Always add 1.0 as the base optical level
+      opticalZoomFactors.append(1.0)
+
+      // For ultra-wide camera (0.5x)
+      if device.hasUltraWideCamera {
+          opticalZoomFactors.append(0.5)
       }
-      
+
+      if #available(iOS 15.0, *) {
+          // Get the optical zoom levels from the device's switch-over points
+          let switchOverFactors = device.virtualDeviceSwitchOverVideoZoomFactors.map {
+              CGFloat(truncating: $0)
+          }
+          
+          // Only add zoom factors that aren't already included
+          for factor in switchOverFactors {
+              if !opticalZoomFactors.contains(factor) {
+                  opticalZoomFactors.append(factor)
+              }
+          }
+      } else {
+          // For older iOS versions, check if telephoto is available (usually 2x)
+          if device.hasTelephotoCamera {
+              opticalZoomFactors.append(2.0)
+          }
+      }
+
       // Sort the zoom factors in ascending order
-    opticalZoomFactors.sort()
+      opticalZoomFactors.sort()
       
-      // Store the available zoom factors
+      // Store the available optical zoom factors
       self.availableOpticalZoomFactors = opticalZoomFactors
   }
     
@@ -579,4 +592,21 @@ private extension UIImage.Orientation {
       case .rightMirrored: .rightMirrored
     }
   }
+}
+
+// At the bottom of the file where it already exists
+private extension AVCaptureDevice {
+    /// Checks if the device has an ultra-wide camera
+    var hasUltraWideCamera: Bool {
+        return self.deviceType == .builtInUltraWideCamera ||
+               (self.position == .back &&
+                self.constituentDevices.contains(where: { $0.deviceType == .builtInUltraWideCamera }))
+    }
+    
+    /// Checks if the device has a telephoto camera
+    var hasTelephotoCamera: Bool {
+        return self.deviceType == .builtInTelephotoCamera ||
+               (self.position == .back &&
+                self.constituentDevices.contains(where: { $0.deviceType == .builtInTelephotoCamera }))
+    }
 }
