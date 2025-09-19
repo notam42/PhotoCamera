@@ -41,6 +41,9 @@ actor CaptureService {
     /// Available zoom factors provided by the device
     private var availableZoomFactors: [CGFloat] = []
 
+    /// Available optical zoom factors provided by the device
+    private var availableOpticalZoomFactors: [CGFloat] = []
+  
     /// The video input for the currently selected device camera.
     private var activeVideoInput: AVCaptureDeviceInput?
 
@@ -327,6 +330,7 @@ actor CaptureService {
         
         // Update zoom capabilities for the current device
         updateZoomCapabilities()
+        updateOpticalZoomCapabilities()
     }
 
     /// Observe capture-related notifications.
@@ -397,6 +401,7 @@ actor CaptureService {
         // Check for optical zoom levels (if available)
         if #available(iOS 15.0, *) {
             // On newer iOS devices, we can get the supported zoom factors directly
+          //TODO: Later call updateOpticalZoomCapabilities()
             zoomFactors.append(contentsOf: device.virtualDeviceSwitchOverVideoZoomFactors.map { CGFloat(truncating: $0) })
         }
         
@@ -417,6 +422,33 @@ actor CaptureService {
         // Store the available zoom factors
         self.availableZoomFactors = zoomFactors
     }
+  
+  /// Updates the available zoom factors based on the current device's capabilities.
+  /// This method is called when changing devices to ensure zoom capabilities are always up-to-date.
+  private func updateOpticalZoomCapabilities() {
+      let device = currentDevice
+      
+      // Reset current zoom factor when changing devices
+      currentZoomFactor = 1.0
+      
+      // Get the device's zoom capabilities
+      var opticalZoomFactors = [CGFloat]()
+      
+      // Always add 1.0 as the default zoom level
+    opticalZoomFactors.append(1.0)
+      
+      // Check for optical zoom levels (if available)
+      if #available(iOS 15.0, *) {
+          // On newer iOS devices, we can get the supported zoom factors directly
+        opticalZoomFactors.append(contentsOf: device.virtualDeviceSwitchOverVideoZoomFactors.map { CGFloat(truncating: $0) })
+      }
+      
+      // Sort the zoom factors in ascending order
+    opticalZoomFactors.sort()
+      
+      // Store the available zoom factors
+      self.availableOpticalZoomFactors = opticalZoomFactors
+  }
     
     // MARK: - Zoom control
     
@@ -425,6 +457,12 @@ actor CaptureService {
     var zoomFactors: [CGFloat] {
         return availableZoomFactors
     }
+  
+  /// Returns all available zoom factors for the current device.
+  /// These zoom factors can be used to provide preset zoom options in the UI.
+  var opticalZoomFactors: [CGFloat] {
+      return availableOpticalZoomFactors
+  }
     
     /// Sets the camera zoom to the specified factor.
     /// - Parameter factor: The zoom factor to set. If the factor is outside the available range,

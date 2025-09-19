@@ -222,9 +222,15 @@ public final class Camera {
     
     /// The maximum zoom factor supported by the current device
     public private(set) var maxZoomFactor: CGFloat = 10.0
+  
+    /// The maximum zoom factor supported by the current device
+    public private(set) var maxOpticalZoomFactor: CGFloat = 2.0
 
     /// Available optical zoom factors for the current device
     public private(set) var availableZoomFactors: [CGFloat] = []
+  
+    /// Available optical zoom factors for the current device
+    public private(set) var availableOpticalZoomFactors: [CGFloat] = []
 
     /// An object that manages the app's capture functionality.
     private let captureService: CaptureService
@@ -289,6 +295,20 @@ public final class Camera {
         // Maximum zoom should come from CaptureService's value (10.0)
       maxZoomFactor = 10.0
     }
+  
+  /// Fetches the available optical zoom factors from the CaptureService
+  public func fetchAvailableOpticalZoomFactors() async {
+      guard !Self.isPreview else { return }
+      
+      availableOpticalZoomFactors = await captureService.opticalZoomFactors
+      //zoomFactor = await captureService.zoomFactor
+      
+      // Default minimum zoom is always 1.0
+    //minZoomFactor = availableOpticalZoomFactors.min() ?? 1.0
+      
+      // Maximum zoom should come from CaptureService's value (10.0)
+    maxOpticalZoomFactor = availableOpticalZoomFactors.max() ?? 1.0
+  }
     
     // MARK: - Changing devices
 
@@ -301,6 +321,7 @@ public final class Camera {
         
         // Update zoom capabilities after device switch
         await fetchAvailableZoomFactors()
+        await fetchAvailableOpticalZoomFactors()
     }
     
     // MARK: - Zoom Controls
