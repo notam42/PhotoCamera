@@ -225,11 +225,12 @@ actor CaptureService {
     }
 
     private func updatePreviewRotation(_ angle: CGFloat) {
-        let previewLayer = videoPreviewLayer
-        Task { @MainActor in
-            // Set initial rotation angle on the video preview.
-            previewLayer.connection?.videoRotationAngle = angle
-        }
+      videoPreviewLayer.connection?.videoRotationAngle = angle
+//        let previewLayer = videoPreviewLayer
+//        Task { @MainActor in
+//            // Set initial rotation angle on the video preview.
+//            previewLayer.connection?.videoRotationAngle = angle
+//        }
     }
 
     private func updateCaptureRotation(_ angle: CGFloat) {
