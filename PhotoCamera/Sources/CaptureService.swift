@@ -16,6 +16,7 @@ public enum CameraError: Error {
     case setupFailed
     case deviceChangeFailed
     case photoCaptureFailed
+    case zoomOperationFailed
 }
 
 /// An actor that manages the capture pipeline, which includes the capture session, device inputs, and capture outputs.
@@ -30,6 +31,15 @@ actor CaptureService {
 
     /// Whether to use the front camera first
     private let forSelfie: Bool
+    
+    /// The current zoom level of the camera
+    private(set) var currentZoomFactor: CGFloat = 1.0
+    
+    /// The maximum zoom level allowed (capped at 10.0)
+    private let maxZoomFactor: CGFloat = 10.0
+    
+    /// Available zoom factors provided by the device
+    private var availableZoomFactors: [CGFloat] = []
 
     /// The video input for the currently selected device camera.
     private var activeVideoInput: AVCaptureDeviceInput?
@@ -314,6 +324,9 @@ actor CaptureService {
         output.maxPhotoQualityPrioritization = .quality
         output.isResponsiveCaptureEnabled = output.isResponsiveCaptureSupported
         output.isFastCapturePrioritizationEnabled = output.isFastCapturePrioritizationSupported
+        
+        // Update zoom capabilities for the current device
+        updateZoomCapabilities()
     }
 
     /// Observe capture-related notifications.
@@ -364,6 +377,118 @@ actor CaptureService {
             delegate.capturePhoto(with: continuation)
         }
     }
+    
+    // MARK: - Zoom handling
+    
+    /// Updates the available zoom factors based on the current device's capabilities.
+    /// This method is called when changing devices to ensure zoom capabilities are always up-to-date.
+    private func updateZoomCapabilities() {
+        let device = currentDevice
+        
+        // Reset current zoom factor when changing devices
+        currentZoomFactor = 1.0
+        
+        // Get the device's zoom capabilities
+        var zoomFactors = [CGFloat]()
+        
+        // Always add 1.0 as the default zoom level
+        zoomFactors.append(1.0)
+        
+        // Check for optical zoom levels (if available)
+        if #available(iOS 15.0, *) {
+            // On newer iOS devices, we can get the supported zoom factors directly
+            zoomFactors.append(contentsOf: device.virtualDeviceSwitchOverVideoZoomFactors.map { CGFloat(truncating: $0) })
+        }
+        
+        // Get the maximum zoom supported by the device, capped at our maxZoomFactor
+        let deviceMaxZoom = min(device.activeFormat.videoMaxZoomFactor, maxZoomFactor)
+        
+        // Add some standard zoom levels if they don't exceed the maximum
+        let standardZoomLevels: [CGFloat] = [2.0, 3.0, 5.0, 8.0, 10.0]
+        for level in standardZoomLevels where level <= deviceMaxZoom {
+            if !zoomFactors.contains(level) {
+                zoomFactors.append(level)
+            }
+        }
+        
+        // Sort the zoom factors in ascending order
+        zoomFactors.sort()
+        
+        // Store the available zoom factors
+        self.availableZoomFactors = zoomFactors
+    }
+    
+    // MARK: - Zoom control
+    
+    /// Returns all available zoom factors for the current device.
+    /// These zoom factors can be used to provide preset zoom options in the UI.
+    var zoomFactors: [CGFloat] {
+        return availableZoomFactors
+    }
+    
+    /// Sets the camera zoom to the specified factor.
+    /// - Parameter factor: The zoom factor to set. If the factor is outside the available range,
+    ///   it will be clamped to the nearest valid zoom level.
+    /// - Throws: `CameraError.zoomOperationFailed` if the zoom operation failed.
+    func setZoomFactor(_ factor: CGFloat) throws {
+        let device = currentDevice
+        
+        // Clamp the zoom factor to the valid range
+        let minZoom: CGFloat = 1.0
+        let maxDeviceZoom = min(device.activeFormat.videoMaxZoomFactor, maxZoomFactor)
+        let targetZoom = clamp(factor, to: minZoom...maxDeviceZoom)
+        
+        do {
+            try device.lockForConfiguration()
+            
+            // Set the zoom factor
+            device.videoZoomFactor = targetZoom
+            currentZoomFactor = targetZoom
+            
+            device.unlockForConfiguration()
+        } catch {
+            throw CameraError.zoomOperationFailed
+        }
+    }
+    
+    /// Increases the zoom level to the next available zoom factor.
+    /// - Throws: `CameraError.zoomOperationFailed` if the zoom operation fails.
+    func zoomIn() throws {
+        guard !availableZoomFactors.isEmpty else { return }
+        
+        // Find the next higher zoom factor
+        let nextZoom = availableZoomFactors.first { $0 > currentZoomFactor } ?? currentZoomFactor
+        
+        // If we're already at max zoom, do nothing
+        if nextZoom == currentZoomFactor { return }
+        
+        try setZoomFactor(nextZoom)
+    }
+    
+    /// Decreases the zoom level to the previous available zoom factor.
+    /// - Throws: `CameraError.zoomOperationFailed` if the zoom operation fails.
+    func zoomOut() throws {
+        guard !availableZoomFactors.isEmpty else { return }
+        
+        // Find all zoom factors less than current and get the highest one
+        let previousZooms = availableZoomFactors.filter { $0 < currentZoomFactor }
+        let previousZoom = previousZooms.max() ?? currentZoomFactor
+        
+        // If we're already at min zoom, do nothing
+        if previousZoom == currentZoomFactor { return }
+        
+        try setZoomFactor(previousZoom)
+    }
+    
+    /// Returns the current zoom factor.
+    var zoomFactor: CGFloat {
+        return currentZoomFactor
+    }
+    
+    // Helper method for clamping CGFloat values
+    private func clamp(_ value: CGFloat, to range: ClosedRange<CGFloat>) -> CGFloat {
+        return max(range.lowerBound, min(value, range.upperBound))
+    }
 }
 
 
@@ -404,16 +529,16 @@ private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
 
 private extension UIImage.Orientation {
 
-	static func from(_ cgImageOrientation: CGImagePropertyOrientation) -> Self {
-		switch cgImageOrientation {
-			case .up: .up
-			case .upMirrored: .upMirrored
-			case .down: .down
-			case .downMirrored: .downMirrored
-			case .left: .left
-			case .leftMirrored: .leftMirrored
-			case .right: .right
-			case .rightMirrored: .rightMirrored
-		}
-	}
+  static func from(_ cgImageOrientation: CGImagePropertyOrientation) -> Self {
+    switch cgImageOrientation {
+      case .up: .up
+      case .upMirrored: .upMirrored
+      case .down: .down
+      case .downMirrored: .downMirrored
+      case .left: .left
+      case .leftMirrored: .leftMirrored
+      case .right: .right
+      case .rightMirrored: .rightMirrored
+    }
+  }
 }
