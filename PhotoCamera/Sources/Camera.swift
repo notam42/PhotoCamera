@@ -90,6 +90,7 @@ public final class Camera {
             
             // Initialize zoom settings after camera starts
             await fetchAvailableZoomFactors()
+            await fetchAvailableOpticalZoomFactors()
         } catch {
             print("Failed to start capture service. \(error)")
             status = .failed
