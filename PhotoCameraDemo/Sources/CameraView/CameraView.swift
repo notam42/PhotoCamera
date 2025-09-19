@@ -27,6 +27,11 @@ struct CameraView: View {
     @State private var blurRadius = CGFloat.zero // camera switch blur effect
     @State private var capturedImage: UIImage? // result
     @State private var libraryItem: PhotosPickerItem?
+  
+    @State private var isZooming = false
+    @State private var zoomDisplayTimer: Timer?
+    @State private var zoomStartFactor: CGFloat = 1.0
+    @GestureState private var magnificationState: CGFloat = 1.0
 
     init(title: String?, forSelfie: Bool, isRound: Bool, onConfirm: @escaping (UIImage?) -> Void) {
 		self.title = title
@@ -50,6 +55,11 @@ struct CameraView: View {
                     // Focus and expose at the tapped point.
                     .onTapGesture { location in
                         Task { await camera.focusAndExpose(at: location) }
+                    }
+                    .gesture(setupMagnificationGesture())
+                    .onAppear {
+                        // Initialize zoom start factor when the view appears
+                        zoomStartFactor = camera.zoomFactor
                     }
                     .opacity(blink ? 0 : 1)
 
@@ -169,27 +179,141 @@ struct CameraView: View {
             blurRadius = isSwitching ? 30 : 0
         }
     }
+  
+  // MARK: - Zoom
+  /// Displays available optical zoom levels as a horizontal picker
+  private func opticalZoomPicker() -> some View {
+      HStack(spacing: 24) {
+          ForEach(camera.opticalZoomFactors, id: \.self) { factor in
+              Button {
+                  Task {
+                      await camera.smoothZoom(to: factor)
+                  }
+              } label: {
+                  Text("\(Int(factor))×")
+                      .foregroundStyle(abs(camera.zoomFactor - factor) < 0.1 ? .yellow : .white)
+                      .font(.system(size: 16, weight: .semibold))
+                      .padding(.vertical, 8)
+                      .padding(.horizontal, 12)
+                      .background(
+                          Capsule()
+                              .fill(Color.black.opacity(0.5))
+                      )
+              }
+          }
+      }
+      .padding(8)
+      .background(
+          Capsule()
+              .fill(Color.black.opacity(0.3))
+      )
+  }
+
+  /// Displays the current zoom level during zooming
+  private func zoomLevelDisplay() -> some View {
+      Text(String(format: "%.1f×", camera.zoomFactor))
+          .font(.system(size: 20, weight: .bold))
+          .foregroundStyle(.white)
+          .padding(10)
+          .background(
+              RoundedRectangle(cornerRadius: 10)
+                  .fill(Color.black.opacity(0.6))
+          )
+          .opacity(isZooming ? 1.0 : 0.0)
+          .animation(.easeOut(duration: 0.2), value: isZooming)
+  }
+
+  /// Sets up the magnification gesture for zooming
+  private func setupMagnificationGesture() -> some Gesture {
+      MagnificationGesture()
+          .onChanged { value in
+              // Cancel any existing hide timer when user is actively zooming
+              zoomDisplayTimer?.invalidate()
+              isZooming = true
+          }
+          .updating($magnificationState) { value, state, _ in
+              state = value
+          }
+          .onEnded { value in
+              // Calculate the target zoom factor based on the pinch gesture
+              let targetZoom = zoomStartFactor * value
+              
+              // Schedule zoom display to disappear
+              zoomDisplayTimer?.invalidate()
+              zoomDisplayTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { _ in
+                  withAnimation {
+                      isZooming = false
+                  }
+              }
+              
+              // Apply the zoom change
+              Task {
+                  await camera.smoothZoom(to: targetZoom)
+                  // Update the start zoom factor for the next gesture
+                  zoomStartFactor = camera.zoomFactor
+              }
+          }
+  }
 
     // MARK: - camera UI
 
-    private func cameraUI() -> some View {
-        GeometryReader { proxy in
-            let landscape = proxy.size.width > proxy.size.height
-            stack(vertical: !landscape) {
-                Spacer()
-                stack(vertical: landscape) {
-                    Spacer()
-                    cameraToolbar(vertical: landscape)
-                    Spacer()
-                }
-                .padding(landscape ? .trailing : .bottom, 28)
-            }
-            .overlay {
-                StatusOverlayView(status: camera.status)
-                    .ignoresSafeArea()
-            }
-        }
-    }
+//    private func cameraUI() -> some View {
+//        GeometryReader { proxy in
+//            let landscape = proxy.size.width > proxy.size.height
+//            stack(vertical: !landscape) {
+//                Spacer()
+//                stack(vertical: landscape) {
+//                    Spacer()
+//                    cameraToolbar(vertical: landscape)
+//                    Spacer()
+//                }
+//                .padding(landscape ? .trailing : .bottom, 28)
+//            }
+//            .overlay {
+//                StatusOverlayView(status: camera.status)
+//                    .ignoresSafeArea()
+//            }
+//        }
+//    }
+  
+  // Update your cameraUI method to include the zoom picker and display
+  private func cameraUI() -> some View {
+      GeometryReader { proxy in
+          let landscape = proxy.size.width > proxy.size.height
+          stack(vertical: !landscape) {
+              Spacer()
+              
+              // Add the optical zoom picker at the bottom
+              VStack {
+                  Spacer()
+                  
+                  // Show zoom level indicator in the center during zooming
+                  zoomLevelDisplay()
+                      .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
+                  
+                  if capturedImage == nil {
+                      opticalZoomPicker()
+                          .padding(.bottom, 16)
+                  }
+                  
+                  stack(vertical: landscape) {
+                      Spacer()
+                      cameraToolbar(vertical: landscape)
+                      Spacer()
+                  }
+                  .padding(landscape ? .trailing : .bottom, 28)
+              }
+          }
+          .overlay {
+              StatusOverlayView(status: camera.status)
+                  .ignoresSafeArea()
+          }
+      }
+      // Update zoom start factor whenever the camera's zoom factor changes
+      .onChange(of: camera.zoomFactor) { newValue in
+          zoomStartFactor = newValue
+      }
+  }
 
     // MARK: - Toolbar
 
