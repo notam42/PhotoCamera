@@ -55,7 +55,7 @@ actor CaptureService {
     private var isSetUp = false
 
     /// A serial dispatch queue to use for capture control actions.
-    private let sessionQueue = DispatchSerialQueue(label: "com.melikyan.CameraView")
+    private let sessionQueue = DispatchSerialQueue(label: "eu.manuelwinter.CameraView")
 
     /// Cancel the async notification loops using this collection; internal.
     private var cancellables = Set<AnyCancellable>()
