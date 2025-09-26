@@ -162,6 +162,7 @@ public struct CameraView: View {
       }
       cameraUI()
     }
+    .lockOrientation(.portrait)
   }
   
   private func closeButton() -> some View {
@@ -500,3 +501,5 @@ private extension View {
 #Preview("Square") {
   CameraView(title: "Take a selfie", forSelfie: true) { _ in }
 }
+
+
