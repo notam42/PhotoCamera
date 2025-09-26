@@ -96,15 +96,15 @@ public struct CameraView: View {
   @State private var capturedImage: UIImage? // result
   @State private var libraryItem: PhotosPickerItem?
   
-  //    @State private var isZooming = false
-  //    @State private var zoomDisplayTimer: Timer?
-  //    @State private var zoomStartFactor: CGFloat = 1.0
-  //    @GestureState private var magnificationState: CGFloat = 1.0
+  // Track the device orientation to apply rotations appropriately
+  @State private var deviceOrientation: UIDeviceOrientation = .portrait
   
   public init(title: String?, forSelfie: Bool, onConfirm: @escaping (UIImage?) -> Void) {
     self.title = title
     self.camera = Camera(forSelfie: forSelfie)
     self.onConfirm = onConfirm
+    // Initialize with the current device orientation
+    self._deviceOrientation = State(initialValue: UIDevice.current.orientation.isValidInterfaceOrientation ? UIDevice.current.orientation : .portrait)
   }
   
   public var body: some View {
@@ -129,7 +129,6 @@ public struct CameraView: View {
         
         // A view that provides a preview of the captured content.
           .overlay {
-            // This is done as an overlay because hiding and showing the video layer (ViewfinderView above) without restarting the session causes strange problems on macOS, though is fine on the iPhone.
             if let capturedImage {
               Image(uiImage: capturedImage)
                 .resizable()
@@ -138,68 +137,74 @@ public struct CameraView: View {
           }
       }
       .frame(maxWidth: .infinity)
-      
       .task {
         await camera.start()
+        
+        // Set up device orientation monitoring
+        setupOrientationMonitoring()
+      }
+      .onDisappear {
+        // Clean up orientation monitoring on the main thread
+        UIDevice.current.endGeneratingDeviceOrientationNotifications()
+        NotificationCenter.default.removeObserver(OrientationObserver.shared)
       }
     }
-    .padding(.vertical, title == nil ? 0 : 60) // make room for the title if present
-    
+    .padding(.vertical, title == nil ? 0 : 60)
     .statusBarHidden(true)
     .background(.black)
-    .ignoresSafeArea() // order is important
+    .ignoresSafeArea()
     .overlay {
-      closeButton()
+      // Apply orientationAwareOverlay to all overlays so they behave correctly
+      // during device rotation
+      orientationAwareOverlay {
+        closeButton()
+      }
+      
       if let title {
-        VStack {
-          Text(title)
-            .font(.title2)
-            .foregroundStyle(.white)
-            .padding(12)
-          Spacer()
+        orientationAwareOverlay {
+          VStack {
+            Text(title)
+              .font(.title2)
+              .foregroundStyle(.white)
+              .padding(12)
+            Spacer()
+          }
         }
       }
+      
       cameraUI()
     }
   }
   
-  private func closeButton() -> some View {
-    VStack(alignment: .trailing) {
-      HStack {
-        Button {
-          dismiss()
-        } label: {
-          Image(systemName: "xmark")
-        }
-        .frame(width: 44, height: 44)
-        .foregroundColor(.white)
-        .font(.system(size: 24))
-        .shadow(color: .black.opacity(0.5), radius: 3)
-        .padding(8)
-        Spacer()
-      }
-      Spacer()
+  /// Sets up device orientation monitoring
+  private func setupOrientationMonitoring() {
+    // Start monitoring device orientation changes
+    OrientationObserver.shared.startMonitoring { newOrientation in
+      self.deviceOrientation = newOrientation
     }
   }
   
-  // MARK: - Internal capture photo method
-  
-  private func capturePhoto() {
-    Task {
-      // "Blink" the viewfinder as if it's the shutter
-      withAnimation(.linear(duration: 0.05)) {
-        blink = true
-      } completion: {
-        withAnimation(.linear(duration: 0.05)) {
-          blink = false
-        }
-      }
-      
-      // Do capture
-      capturedImage = try? await camera.capturePhoto()
-    }
+  /// Creates a view that respects device orientation for overlay elements
+  private func orientationAwareOverlay<Content: View>(@ViewBuilder content: @escaping () -> Content) -> some View {
+    content()
+      .rotationEffect(rotationAngle)
+      .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
   }
   
+  /// Calculates rotation angle based on device orientation
+  private var rotationAngle: Angle {
+    switch deviceOrientation {
+    case .landscapeLeft:
+      return .degrees(90)
+    case .landscapeRight:
+      return .degrees(-90)
+    case .portraitUpsideDown:
+      return .degrees(180)
+    default:
+      return .degrees(0)
+    }
+  }
+
   // MARK: - viewfinder container
   
   /// Creates the viewfinder container with appropriate aspect ratio based on device orientation
@@ -314,67 +319,26 @@ public struct CameraView: View {
   // MARK: - camera UI
   private func cameraUI() -> some View {
     GeometryReader { proxy in
-      let landscape = proxy.size.width > proxy.size.height
-      stack(vertical: !landscape) {
+      VStack {
         Spacer()
-        stack(vertical: landscape) {
-          Spacer()
-          cameraToolbar(vertical: landscape)
-          Spacer()
-        }
-        .padding(landscape ? .trailing : .bottom, 28)
+        // Always place the camera toolbar at the bottom in portrait orientation
+        cameraToolbar()
+          .padding(.bottom, 28)
       }
+      .frame(maxWidth: .infinity)
       .overlay {
         StatusOverlayView(status: camera.status)
           .ignoresSafeArea()
+          .rotationEffect(rotationAngle)
+          .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
       }
     }
   }
   
-  /*
-   // Update your cameraUI method to include the zoom picker and display
-   private func cameraUI() -> some View {
-   GeometryReader { proxy in
-   let landscape = proxy.size.width > proxy.size.height
-   stack(vertical: !landscape) {
-   Spacer()
-   
-   // Add the optical zoom picker at the bottom
-   VStack {
-   Spacer()
-   
-   // Show zoom level indicator in the center during zooming
-   zoomLevelDisplay()
-   .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
-   
-   if capturedImage == nil {
-   opticalZoomPicker()
-   .padding(.bottom, 16)
-   }
-   
-   stack(vertical: landscape) {
-   Spacer()
-   cameraToolbar(vertical: landscape)
-   Spacer()
-   }
-   .padding(landscape ? .trailing : .bottom, 28)
-   }
-   }
-   .overlay {
-   StatusOverlayView(status: camera.status)
-   .ignoresSafeArea()
-   }
-   }
-   // Update zoom start factor whenever the camera's zoom factor changes
-   .onChange(of: camera.zoomFactor) { newValue in
-   zoomStartFactor = newValue
-   }
-   */
-  
   // MARK: - Toolbar
   
-  private func cameraToolbar(vertical: Bool) -> some View {
-    stack(vertical: vertical) {
+  private func cameraToolbar() -> some View {
+    HStack {
       if capturedImage != nil {
         retryButton()
         Spacer()
@@ -390,11 +354,14 @@ public struct CameraView: View {
     }
     .foregroundColor(.white)
     .font(.system(size: 24, weight: .medium))
-    .frame(width: vertical ? toolbarHeight : nil, height: vertical ? nil : toolbarHeight)
-    .padding(vertical ? .vertical : .horizontal, 16)
+    .frame(height: toolbarHeight)
+    .padding(.horizontal, 16)
     .background(.ultraThinMaterial.opacity(0.3))
     .cornerRadius(12)
-    .frame(maxWidth: vertical ? nil : maxToolbarWidth, maxHeight: vertical ? maxToolbarWidth : nil)
+    .frame(maxWidth: maxToolbarWidth)
+    // Apply rotation to the toolbar content but not its position
+    .rotationEffect(rotationAngle)
+    .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
   }
   
   // MARK: - Confirm buttons
@@ -481,6 +448,45 @@ public struct CameraView: View {
         .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
   }
+  
+  /// Creates a close/dismiss button in the top-left corner
+  private func closeButton() -> some View {
+    VStack(alignment: .trailing) {
+      HStack {
+        Button {
+          dismiss()
+        } label: {
+          Image(systemName: "xmark")
+        }
+        .frame(width: 44, height: 44)
+        .foregroundColor(.white)
+        .font(.system(size: 24))
+        .shadow(color: .black.opacity(0.5), radius: 3)
+        .padding(8)
+        Spacer()
+      }
+      Spacer()
+    }
+  }
+  
+  // MARK: - Internal capture photo method
+  
+  /// Captures a photo from the camera and applies the shutter blink effect
+  private func capturePhoto() {
+    Task {
+      // "Blink" the viewfinder as if it's the shutter
+      withAnimation(.linear(duration: 0.05)) {
+        blink = true
+      } completion: {
+        withAnimation(.linear(duration: 0.05)) {
+          blink = false
+        }
+      }
+      
+      // Do capture
+      capturedImage = try? await camera.capturePhoto()
+    }
+  }
 }
 
 // MARK: - View.stack() extension
@@ -506,4 +512,33 @@ private extension View {
 
 #Preview("Square") {
   CameraView(title: "Take a selfie", forSelfie: true) { _ in }
+}
+
+/// A class that safely handles device orientation monitoring
+@MainActor
+private class OrientationObserver: NSObject {
+  static let shared = OrientationObserver()
+  private var orientationChanged: ((UIDeviceOrientation) -> Void)?
+  
+  func startMonitoring(onChange: @escaping (UIDeviceOrientation) -> Void) {
+    self.orientationChanged = onChange
+    
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(orientationDidChange),
+      name: UIDevice.orientationDidChangeNotification,
+      object: nil
+    )
+    
+    if !UIDevice.current.isGeneratingDeviceOrientationNotifications {
+      UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+    }
+  }
+  
+  @objc private func orientationDidChange() {
+    let orientation = UIDevice.current.orientation
+    if orientation.isValidInterfaceOrientation {
+      orientationChanged?(orientation)
+    }
+  }
 }
