@@ -84,6 +84,8 @@ private let captureButtonDimension = 68.0
  */
 public struct CameraView: View {
   @Environment(\.dismiss) private var dismiss
+  @Environment(\.verticalSizeClass) private var verticalSizeClass
+  @Environment(\.horizontalSizeClass) private var horizontalSizeClass
   
   private let title: String?
   private let onConfirm: (UIImage?) -> Void
@@ -108,7 +110,9 @@ public struct CameraView: View {
   public var body: some View {
     GeometryReader { proxy in
       // A container view that manages the placement of the preview.
-      viewfinderContainer(viewSize: proxy.size) {
+      let isPortrait = verticalSizeClass == .regular && horizontalSizeClass == .compact
+      
+      viewfinderContainer(viewSize: proxy.size, isPortrait: isPortrait) {
         ViewfinderView(camera: camera)
         // Handle capture events from device hardware buttons.
           .onCameraCaptureEvent { event in
@@ -121,11 +125,6 @@ public struct CameraView: View {
           .onTapGesture { location in
             Task { await camera.focusAndExpose(at: location) }
           }
-        //                    .gesture(setupMagnificationGesture())
-        //                    .onAppear {
-        //                        // Initialize zoom start factor when the view appears
-        //                        zoomStartFactor = camera.zoomFactor
-        //                    }
           .opacity(blink ? 0 : 1)
         
         // A view that provides a preview of the captured content.
@@ -203,18 +202,24 @@ public struct CameraView: View {
   
   // MARK: - viewfinder container
   
-  private func viewfinderContainer(viewSize: CGSize, @ViewBuilder content: @escaping () -> some View) -> some View {
+  /// Creates the viewfinder container with appropriate aspect ratio based on device orientation
+  /// - Parameters:
+  ///   - viewSize: The available view size
+  ///   - isPortrait: Whether the device is in portrait orientation
+  ///   - content: The content to display within the viewfinder
+  private func viewfinderContainer(viewSize: CGSize, isPortrait: Bool, @ViewBuilder content: @escaping () -> some View) -> some View {
     VStack {
-      let aspectRatio: CGFloat = 4.0/3.0 // Change from 1.0 to 4:3
+      // Use 3:4 for portrait, 4:3 for landscape
+      let aspectRatio: CGFloat = isPortrait ? 3.0/4.0 : 4.0/3.0
       
-      // Calculate dimensions to fit the available space while maintaining 4:3
+      // Calculate dimensions to fit the available space while maintaining the right aspect ratio
       let availableWidth = min(viewSize.width, viewSize.height * aspectRatio) - 32
       let width = max(0, availableWidth)
       let height = width / aspectRatio
       
       Spacer()
       content()
-        .aspectRatio(1.0, contentMode: .fill)
+        .aspectRatio(aspectRatio, contentMode: .fill)
         .frame(width: width, height: height)
         .blur(radius: blurRadius, opaque: true)
         .clipped()
@@ -364,7 +369,6 @@ public struct CameraView: View {
    .onChange(of: camera.zoomFactor) { newValue in
    zoomStartFactor = newValue
    }
-   }
    */
   
   // MARK: - Toolbar
@@ -398,7 +402,10 @@ public struct CameraView: View {
   private func confirmButton() -> some View {
     Button {
       dismiss()
-      onConfirm(capturedImage?.cropped(ratio: 4.0/3.0))
+      // Use the appropriate aspect ratio based on orientation when cropping
+      let isPortrait = verticalSizeClass == .regular && horizontalSizeClass == .compact
+      let aspectRatio = isPortrait ? 3.0/4.0 : 4.0/3.0
+      onConfirm(capturedImage?.cropped(ratio: aspectRatio))
     } label: {
       Image(systemName: "checkmark")
     }
