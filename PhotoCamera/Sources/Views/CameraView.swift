@@ -84,6 +84,7 @@ private let captureButtonDimension = 68.0
  */
 public struct CameraView: View {
   @Environment(\.dismiss) private var dismiss
+  @EnvironmentObject private var orientationManager: DeviceOrientationManager
   
   private let title: String?
   private let onConfirm: (UIImage?) -> Void
@@ -163,6 +164,7 @@ public struct CameraView: View {
       cameraUI()
     }
     .lockOrientation(.portrait)
+    .withOrientationDetection()
   }
   
   private func closeButton() -> some View {
@@ -206,7 +208,8 @@ public struct CameraView: View {
   
   private func viewfinderContainer(viewSize: CGSize, @ViewBuilder content: @escaping () -> some View) -> some View {
     VStack {
-      let aspectRatio: CGFloat = 4.0/3.0 // Change from 1.0 to 4:3
+      //let aspectRatio: CGFloat = 4.0/3.0 // Change from 1.0 to 4:3
+      let aspectRatio = DeviceOrientationUtility.getCropRatio(for: orientationManager.orientation)
       
       // Calculate dimensions to fit the available space while maintaining 4:3
       let availableWidth = min(viewSize.width, viewSize.height * aspectRatio) - 32
@@ -397,9 +400,12 @@ public struct CameraView: View {
   // MARK: - Confirm buttons
   
   private func confirmButton() -> some View {
+    
     Button {
       dismiss()
-      onConfirm(capturedImage?.cropped(ratio: 4.0/3.0))
+      //onConfirm(capturedImage?.cropped(ratio: 4.0/3.0))
+      let cropRatio = DeviceOrientationUtility.getCropRatio(for: orientationManager.orientation)
+      onConfirm(capturedImage?.cropped(ratio: cropRatio))
     } label: {
       Image(systemName: "checkmark")
     }
