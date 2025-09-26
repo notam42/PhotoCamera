@@ -84,8 +84,6 @@ private let captureButtonDimension = 68.0
  */
 public struct CameraView: View {
   @Environment(\.dismiss) private var dismiss
-  @Environment(\.verticalSizeClass) private var verticalSizeClass
-  @Environment(\.horizontalSizeClass) private var horizontalSizeClass
   
   private let title: String?
   private let onConfirm: (UIImage?) -> Void
@@ -96,23 +94,21 @@ public struct CameraView: View {
   @State private var capturedImage: UIImage? // result
   @State private var libraryItem: PhotosPickerItem?
   
-  // Track the device orientation to apply rotations appropriately
-  @State private var deviceOrientation: UIDeviceOrientation = .portrait
+  //    @State private var isZooming = false
+  //    @State private var zoomDisplayTimer: Timer?
+  //    @State private var zoomStartFactor: CGFloat = 1.0
+  //    @GestureState private var magnificationState: CGFloat = 1.0
   
   public init(title: String?, forSelfie: Bool, onConfirm: @escaping (UIImage?) -> Void) {
     self.title = title
     self.camera = Camera(forSelfie: forSelfie)
     self.onConfirm = onConfirm
-    // Initialize with the current device orientation
-    self._deviceOrientation = State(initialValue: UIDevice.current.orientation.isValidInterfaceOrientation ? UIDevice.current.orientation : .portrait)
   }
   
   public var body: some View {
     GeometryReader { proxy in
       // A container view that manages the placement of the preview.
-      let isPortrait = verticalSizeClass == .regular && horizontalSizeClass == .compact
-      
-      viewfinderContainer(viewSize: proxy.size, isPortrait: isPortrait) {
+      viewfinderContainer(viewSize: proxy.size) {
         ViewfinderView(camera: camera)
         // Handle capture events from device hardware buttons.
           .onCameraCaptureEvent { event in
@@ -125,10 +121,16 @@ public struct CameraView: View {
           .onTapGesture { location in
             Task { await camera.focusAndExpose(at: location) }
           }
+        //                    .gesture(setupMagnificationGesture())
+        //                    .onAppear {
+        //                        // Initialize zoom start factor when the view appears
+        //                        zoomStartFactor = camera.zoomFactor
+        //                    }
           .opacity(blink ? 0 : 1)
         
         // A view that provides a preview of the captured content.
           .overlay {
+            // This is done as an overlay because hiding and showing the video layer (ViewfinderView above) without restarting the session causes strange problems on macOS, though is fine on the iPhone.
             if let capturedImage {
               Image(uiImage: capturedImage)
                 .resizable()
@@ -137,108 +139,82 @@ public struct CameraView: View {
           }
       }
       .frame(maxWidth: .infinity)
+      
       .task {
         await camera.start()
-        
-        // Set up device orientation monitoring
-        setupOrientationMonitoring()
-      }
-      .onDisappear {
-        // Clean up orientation monitoring on the main thread
-        UIDevice.current.endGeneratingDeviceOrientationNotifications()
-        NotificationCenter.default.removeObserver(OrientationObserver.shared)
       }
     }
-    .padding(.vertical, title == nil ? 0 : 60)
+    .padding(.vertical, title == nil ? 0 : 60) // make room for the title if present
+    
     .statusBarHidden(true)
     .background(.black)
-    .ignoresSafeArea()
+    .ignoresSafeArea() // order is important
     .overlay {
-      GeometryReader { proxy in
-        orientationAwareTitleOverlay(proxy.size)
-        orientationAwareCloseButtonOverlay(proxy.size)
-        orientationAwareCameraUIOverlay(proxy.size)
-        
-        StatusOverlayView(status: camera.status)
-          .ignoresSafeArea()
-          .rotationEffect(rotationAngle)
-          .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
+      closeButton()
+      if let title {
+        VStack {
+          Text(title)
+            .font(.title2)
+            .foregroundStyle(.white)
+            .padding(12)
+          Spacer()
+        }
       }
+      cameraUI()
     }
   }
   
-  /// Sets up device orientation monitoring
-  private func setupOrientationMonitoring() {
-    // Start monitoring device orientation changes
-    OrientationObserver.shared.startMonitoring { newOrientation in
-      self.deviceOrientation = newOrientation
+  private func closeButton() -> some View {
+    VStack(alignment: .trailing) {
+      HStack {
+        Button {
+          dismiss()
+        } label: {
+          Image(systemName: "xmark")
+        }
+        .frame(width: 44, height: 44)
+        .foregroundColor(.white)
+        .font(.system(size: 24))
+        .shadow(color: .black.opacity(0.5), radius: 3)
+        .padding(8)
+        Spacer()
+      }
+      Spacer()
     }
   }
   
-  /// Calculates rotation angle based on device orientation
-  private var rotationAngle: Angle {
-    switch deviceOrientation {
-    case .landscapeLeft:
-      return .degrees(90)
-    case .landscapeRight:
-      return .degrees(-90)
-    case .portraitUpsideDown:
-      return .degrees(180)
-    default:
-      return .degrees(0)
+  // MARK: - Internal capture photo method
+  
+  private func capturePhoto() {
+    Task {
+      // "Blink" the viewfinder as if it's the shutter
+      withAnimation(.linear(duration: 0.05)) {
+        blink = true
+      } completion: {
+        withAnimation(.linear(duration: 0.05)) {
+          blink = false
+        }
+      }
+      
+      // Do capture
+      capturedImage = try? await camera.capturePhoto()
     }
   }
   
-  /// Returns the appropriate edge alignment for the current device orientation
-  private var toolbarEdgeAlignment: Alignment {
-    switch deviceOrientation {
-    case .landscapeLeft:
-      return .trailing // Right edge
-    case .landscapeRight:
-      return .leading // Left edge
-    case .portraitUpsideDown:
-      return .top // Top edge
-    default:
-      return .bottom // Bottom edge (portrait)
-    }
-  }
-  
-  /// Returns the appropriate edge inset for the current device orientation
-  private func toolbarEdgeInset(_ size: CGSize) -> EdgeInsets {
-    let padding: CGFloat = 28
-    
-    switch deviceOrientation {
-    case .landscapeLeft:
-      return EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: padding)
-    case .landscapeRight:
-      return EdgeInsets(top: 0, leading: padding, bottom: 0, trailing: 0)
-    case .portraitUpsideDown:
-      return EdgeInsets(top: padding, leading: 0, bottom: 0, trailing: 0)
-    default:
-      return EdgeInsets(top: 0, leading: 0, bottom: padding, trailing: 0)
-    }
-  }
-
   // MARK: - viewfinder container
   
-  /// Creates the viewfinder container with appropriate aspect ratio based on device orientation
-  /// - Parameters:
-  ///   - viewSize: The available view size
-  ///   - isPortrait: Whether the device is in portrait orientation
-  ///   - content: The content to display within the viewfinder
-  private func viewfinderContainer(viewSize: CGSize, isPortrait: Bool, @ViewBuilder content: @escaping () -> some View) -> some View {
+  private func viewfinderContainer(viewSize: CGSize, @ViewBuilder content: @escaping () -> some View) -> some View {
     VStack {
-      // Use 3:4 for portrait, 4:3 for landscape
-      let aspectRatio: CGFloat = isPortrait ? 3.0/4.0 : 4.0/3.0
+      let aspectRatio: CGFloat = 4.0/3.0 // Change from 1.0 to 4:3
       
-      // Calculate dimensions to fit the available space while maintaining the right aspect ratio
+      // Calculate dimensions to fit the available space while maintaining 4:3
       let availableWidth = min(viewSize.width, viewSize.height * aspectRatio) - 32
       let width = max(0, availableWidth)
       let height = width / aspectRatio
       
       Spacer()
       content()
-        .aspectRatio(aspectRatio, contentMode: .fill)
+        .aspectRatio(1.0, contentMode: .fill)
         .frame(width: width, height: height)
         .blur(radius: blurRadius, opaque: true)
         .clipped()
@@ -247,68 +223,160 @@ public struct CameraView: View {
     }
   }
   
-  // MARK: - Orientation aware overlay views
-  
-  private func orientationAwareTitleOverlay(_ size: CGSize) -> some View {
-    Group {
-      if let title = title {
-        VStack {
-          Text(title)
-            .font(.title2)
-            .foregroundStyle(.white)
-            .padding(12)
-            .rotationEffect(rotationAngle)
-          Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
-      }
-    }
-  }
-  
-  private func orientationAwareCloseButtonOverlay(_ size: CGSize) -> some View {
-    ZStack(alignment: .topLeading) {
-      Button {
-        dismiss()
-      } label: {
-        Image(systemName: "xmark")
-          .font(.system(size: 24))
-          .foregroundColor(.white)
-          .shadow(color: .black.opacity(0.5), radius: 3)
-          .frame(width: 44, height: 44)
-          .rotationEffect(rotationAngle)
-      }
-      .padding(8)
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
-  }
-  
-  private func orientationAwareCameraUIOverlay(_ size: CGSize) -> some View {
-    ZStack(alignment: toolbarEdgeAlignment) {
-      cameraToolbar()
-        .rotationEffect(rotationAngle)
-        .padding(toolbarEdgeInset(size))
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
-  }
-  
   private func updateBlurRadius(_: Bool, _ isSwitching: Bool) {
     withAnimation {
       blurRadius = isSwitching ? 30 : 0
     }
   }
   
+  /*
+   // MARK: - Zoom
+   /// Displays available optical zoom levels as a horizontal picker
+   private func opticalZoomPicker() -> some View {
+   HStack(spacing: 24) {
+   ForEach(camera.opticalZoomFactors, id: \.self) { factor in
+   Button {
+   Task {
+   await camera.smoothZoom(to: factor)
+   }
+   } label: {
+   Text("\(Int(factor))×")
+   .foregroundStyle(abs(camera.zoomFactor - factor) < 0.1 ? .yellow : .white)
+   .font(.system(size: 16, weight: .semibold))
+   .padding(.vertical, 8)
+   .padding(.horizontal, 12)
+   .background(
+   Capsule()
+   .fill(Color.black.opacity(0.5))
+   )
+   }
+   }
+   }
+   .padding(8)
+   .background(
+   Capsule()
+   .fill(Color.black.opacity(0.3))
+   )
+   }
+   
+   /// Displays the current zoom level during zooming
+   private func zoomLevelDisplay() -> some View {
+   Text(String(format: "%.1f×", camera.zoomFactor))
+   .font(.system(size: 20, weight: .bold))
+   .foregroundStyle(.white)
+   .padding(10)
+   .background(
+   RoundedRectangle(cornerRadius: 10)
+   .fill(Color.black.opacity(0.6))
+   )
+   .opacity(isZooming ? 1.0 : 0.0)
+   .animation(.easeOut(duration: 0.2), value: isZooming)
+   }
+   
+   /// Sets up the magnification gesture for zooming
+   private func setupMagnificationGesture() -> some Gesture {
+   MagnificationGesture()
+   .onChanged { value in
+   // Cancel any existing hide timer when user is actively zooming
+   zoomDisplayTimer?.invalidate()
+   isZooming = true
+   }
+   .updating($magnificationState) { value, state, _ in
+   state = value
+   }
+   .onEnded { value in
+   // Calculate the target zoom factor based on the pinch gesture
+   let targetZoom = zoomStartFactor * value
+   
+   // Schedule zoom display to disappear
+   zoomDisplayTimer?.invalidate()
+   zoomDisplayTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { _ in
+   withAnimation {
+   isZooming = false
+   }
+   }
+   
+   // Apply the zoom change
+   Task {
+   await camera.smoothZoom(to: targetZoom)
+   // Update the start zoom factor for the next gesture
+   zoomStartFactor = camera.zoomFactor
+   }
+   }
+   }
+   */
+  
+  // MARK: - camera UI
+  private func cameraUI() -> some View {
+    GeometryReader { proxy in
+      let landscape = proxy.size.width > proxy.size.height
+      stack(vertical: !landscape) {
+        Spacer()
+        stack(vertical: landscape) {
+          Spacer()
+          cameraToolbar(vertical: landscape)
+          Spacer()
+        }
+        .padding(landscape ? .trailing : .bottom, 28)
+      }
+      .overlay {
+        StatusOverlayView(status: camera.status)
+          .ignoresSafeArea()
+      }
+    }
+  }
+  
+  /*
+   // Update your cameraUI method to include the zoom picker and display
+   private func cameraUI() -> some View {
+   GeometryReader { proxy in
+   let landscape = proxy.size.width > proxy.size.height
+   stack(vertical: !landscape) {
+   Spacer()
+   
+   // Add the optical zoom picker at the bottom
+   VStack {
+   Spacer()
+   
+   // Show zoom level indicator in the center during zooming
+   zoomLevelDisplay()
+   .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
+   
+   if capturedImage == nil {
+   opticalZoomPicker()
+   .padding(.bottom, 16)
+   }
+   
+   stack(vertical: landscape) {
+   Spacer()
+   cameraToolbar(vertical: landscape)
+   Spacer()
+   }
+   .padding(landscape ? .trailing : .bottom, 28)
+   }
+   }
+   .overlay {
+   StatusOverlayView(status: camera.status)
+   .ignoresSafeArea()
+   }
+   }
+   // Update zoom start factor whenever the camera's zoom factor changes
+   .onChange(of: camera.zoomFactor) { newValue in
+   zoomStartFactor = newValue
+   }
+   }
+   */
+  
   // MARK: - Toolbar
   
-  private func cameraToolbar() -> some View {
-    HStack {
+  private func cameraToolbar(vertical: Bool) -> some View {
+    stack(vertical: vertical) {
       if capturedImage != nil {
         retryButton()
         Spacer()
         confirmButton()
-      } else {
+      }
+      else {
         photoPickerButton()
         Spacer()
         captureButton()
@@ -318,11 +386,11 @@ public struct CameraView: View {
     }
     .foregroundColor(.white)
     .font(.system(size: 24, weight: .medium))
-    .frame(height: toolbarHeight)
-    .padding(.horizontal, 16)
+    .frame(width: vertical ? toolbarHeight : nil, height: vertical ? nil : toolbarHeight)
+    .padding(vertical ? .vertical : .horizontal, 16)
     .background(.ultraThinMaterial.opacity(0.3))
     .cornerRadius(12)
-    .frame(maxWidth: maxToolbarWidth)
+    .frame(maxWidth: vertical ? nil : maxToolbarWidth, maxHeight: vertical ? maxToolbarWidth : nil)
   }
   
   // MARK: - Confirm buttons
@@ -330,10 +398,7 @@ public struct CameraView: View {
   private func confirmButton() -> some View {
     Button {
       dismiss()
-      // Use the appropriate aspect ratio based on orientation when cropping
-      let isPortrait = verticalSizeClass == .regular && horizontalSizeClass == .compact
-      let aspectRatio = isPortrait ? 3.0/4.0 : 4.0/3.0
-      onConfirm(capturedImage?.cropped(ratio: aspectRatio))
+      onConfirm(capturedImage?.cropped(ratio: 4.0/3.0))
     } label: {
       Image(systemName: "checkmark")
     }
@@ -409,25 +474,6 @@ public struct CameraView: View {
         .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
   }
-  
-  // MARK: - Internal capture photo method
-  
-  /// Captures a photo from the camera and applies the shutter blink effect
-  private func capturePhoto() {
-    Task {
-      // "Blink" the viewfinder as if it's the shutter
-      withAnimation(.linear(duration: 0.05)) {
-        blink = true
-      } completion: {
-        withAnimation(.linear(duration: 0.05)) {
-          blink = false
-        }
-      }
-      
-      // Do capture
-      capturedImage = try? await camera.capturePhoto()
-    }
-  }
 }
 
 // MARK: - View.stack() extension
@@ -453,33 +499,4 @@ private extension View {
 
 #Preview("Square") {
   CameraView(title: "Take a selfie", forSelfie: true) { _ in }
-}
-
-/// A class that safely handles device orientation monitoring
-@MainActor
-private class OrientationObserver: NSObject {
-  static let shared = OrientationObserver()
-  private var orientationChanged: ((UIDeviceOrientation) -> Void)?
-  
-  func startMonitoring(onChange: @escaping (UIDeviceOrientation) -> Void) {
-    self.orientationChanged = onChange
-    
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(orientationDidChange),
-      name: UIDevice.orientationDidChangeNotification,
-      object: nil
-    )
-    
-    if !UIDevice.current.isGeneratingDeviceOrientationNotifications {
-      UIDevice.current.beginGeneratingDeviceOrientationNotifications()
-    }
-  }
-  
-  @objc private func orientationDidChange() {
-    let orientation = UIDevice.current.orientation
-    if orientation.isValidInterfaceOrientation {
-      orientationChanged?(orientation)
-    }
-  }
 }
