@@ -154,25 +154,16 @@ public struct CameraView: View {
     .background(.black)
     .ignoresSafeArea()
     .overlay {
-      // Apply orientationAwareOverlay to all overlays so they behave correctly
-      // during device rotation
-      orientationAwareOverlay {
-        closeButton()
+      GeometryReader { proxy in
+        orientationAwareTitleOverlay(proxy.size)
+        orientationAwareCloseButtonOverlay(proxy.size)
+        orientationAwareCameraUIOverlay(proxy.size)
+        
+        StatusOverlayView(status: camera.status)
+          .ignoresSafeArea()
+          .rotationEffect(rotationAngle)
+          .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
       }
-      
-      if let title {
-        orientationAwareOverlay {
-          VStack {
-            Text(title)
-              .font(.title2)
-              .foregroundStyle(.white)
-              .padding(12)
-            Spacer()
-          }
-        }
-      }
-      
-      cameraUI()
     }
   }
   
@@ -182,13 +173,6 @@ public struct CameraView: View {
     OrientationObserver.shared.startMonitoring { newOrientation in
       self.deviceOrientation = newOrientation
     }
-  }
-  
-  /// Creates a view that respects device orientation for overlay elements
-  private func orientationAwareOverlay<Content: View>(@ViewBuilder content: @escaping () -> Content) -> some View {
-    content()
-      .rotationEffect(rotationAngle)
-      .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
   }
   
   /// Calculates rotation angle based on device orientation
@@ -202,6 +186,36 @@ public struct CameraView: View {
       return .degrees(180)
     default:
       return .degrees(0)
+    }
+  }
+  
+  /// Returns the appropriate edge alignment for the current device orientation
+  private var toolbarEdgeAlignment: Alignment {
+    switch deviceOrientation {
+    case .landscapeLeft:
+      return .trailing // Right edge
+    case .landscapeRight:
+      return .leading // Left edge
+    case .portraitUpsideDown:
+      return .top // Top edge
+    default:
+      return .bottom // Bottom edge (portrait)
+    }
+  }
+  
+  /// Returns the appropriate edge inset for the current device orientation
+  private func toolbarEdgeInset(_ size: CGSize) -> EdgeInsets {
+    let padding: CGFloat = 28
+    
+    switch deviceOrientation {
+    case .landscapeLeft:
+      return EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: padding)
+    case .landscapeRight:
+      return EdgeInsets(top: 0, leading: padding, bottom: 0, trailing: 0)
+    case .portraitUpsideDown:
+      return EdgeInsets(top: padding, leading: 0, bottom: 0, trailing: 0)
+    default:
+      return EdgeInsets(top: 0, leading: 0, bottom: padding, trailing: 0)
     }
   }
 
@@ -233,105 +247,56 @@ public struct CameraView: View {
     }
   }
   
-  private func updateBlurRadius(_: Bool, _ isSwitching: Bool) {
-    withAnimation {
-      blurRadius = isSwitching ? 30 : 0
+  // MARK: - Orientation aware overlay views
+  
+  private func orientationAwareTitleOverlay(_ size: CGSize) -> some View {
+    Group {
+      if let title = title {
+        VStack {
+          Text(title)
+            .font(.title2)
+            .foregroundStyle(.white)
+            .padding(12)
+            .rotationEffect(rotationAngle)
+          Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
+      }
     }
   }
   
-  /*
-   // MARK: - Zoom
-   /// Displays available optical zoom levels as a horizontal picker
-   private func opticalZoomPicker() -> some View {
-   HStack(spacing: 24) {
-   ForEach(camera.opticalZoomFactors, id: \.self) { factor in
-   Button {
-   Task {
-   await camera.smoothZoom(to: factor)
-   }
-   } label: {
-   Text("\(Int(factor))×")
-   .foregroundStyle(abs(camera.zoomFactor - factor) < 0.1 ? .yellow : .white)
-   .font(.system(size: 16, weight: .semibold))
-   .padding(.vertical, 8)
-   .padding(.horizontal, 12)
-   .background(
-   Capsule()
-   .fill(Color.black.opacity(0.5))
-   )
-   }
-   }
-   }
-   .padding(8)
-   .background(
-   Capsule()
-   .fill(Color.black.opacity(0.3))
-   )
-   }
-   
-   /// Displays the current zoom level during zooming
-   private func zoomLevelDisplay() -> some View {
-   Text(String(format: "%.1f×", camera.zoomFactor))
-   .font(.system(size: 20, weight: .bold))
-   .foregroundStyle(.white)
-   .padding(10)
-   .background(
-   RoundedRectangle(cornerRadius: 10)
-   .fill(Color.black.opacity(0.6))
-   )
-   .opacity(isZooming ? 1.0 : 0.0)
-   .animation(.easeOut(duration: 0.2), value: isZooming)
-   }
-   
-   /// Sets up the magnification gesture for zooming
-   private func setupMagnificationGesture() -> some Gesture {
-   MagnificationGesture()
-   .onChanged { value in
-   // Cancel any existing hide timer when user is actively zooming
-   zoomDisplayTimer?.invalidate()
-   isZooming = true
-   }
-   .updating($magnificationState) { value, state, _ in
-   state = value
-   }
-   .onEnded { value in
-   // Calculate the target zoom factor based on the pinch gesture
-   let targetZoom = zoomStartFactor * value
-   
-   // Schedule zoom display to disappear
-   zoomDisplayTimer?.invalidate()
-   zoomDisplayTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { _ in
-   withAnimation {
-   isZooming = false
-   }
-   }
-   
-   // Apply the zoom change
-   Task {
-   await camera.smoothZoom(to: targetZoom)
-   // Update the start zoom factor for the next gesture
-   zoomStartFactor = camera.zoomFactor
-   }
-   }
-   }
-   */
-  
-  // MARK: - camera UI
-  private func cameraUI() -> some View {
-    GeometryReader { proxy in
-      VStack {
-        Spacer()
-        // Always place the camera toolbar at the bottom in portrait orientation
-        cameraToolbar()
-          .padding(.bottom, 28)
-      }
-      .frame(maxWidth: .infinity)
-      .overlay {
-        StatusOverlayView(status: camera.status)
-          .ignoresSafeArea()
+  private func orientationAwareCloseButtonOverlay(_ size: CGSize) -> some View {
+    ZStack(alignment: .topLeading) {
+      Button {
+        dismiss()
+      } label: {
+        Image(systemName: "xmark")
+          .font(.system(size: 24))
+          .foregroundColor(.white)
+          .shadow(color: .black.opacity(0.5), radius: 3)
+          .frame(width: 44, height: 44)
           .rotationEffect(rotationAngle)
-          .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
       }
+      .padding(8)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
+  }
+  
+  private func orientationAwareCameraUIOverlay(_ size: CGSize) -> some View {
+    ZStack(alignment: toolbarEdgeAlignment) {
+      cameraToolbar()
+        .rotationEffect(rotationAngle)
+        .padding(toolbarEdgeInset(size))
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
+  }
+  
+  private func updateBlurRadius(_: Bool, _ isSwitching: Bool) {
+    withAnimation {
+      blurRadius = isSwitching ? 30 : 0
     }
   }
   
@@ -343,8 +308,7 @@ public struct CameraView: View {
         retryButton()
         Spacer()
         confirmButton()
-      }
-      else {
+      } else {
         photoPickerButton()
         Spacer()
         captureButton()
@@ -359,9 +323,6 @@ public struct CameraView: View {
     .background(.ultraThinMaterial.opacity(0.3))
     .cornerRadius(12)
     .frame(maxWidth: maxToolbarWidth)
-    // Apply rotation to the toolbar content but not its position
-    .rotationEffect(rotationAngle)
-    .animation(.easeInOut(duration: 0.3), value: deviceOrientation)
   }
   
   // MARK: - Confirm buttons
@@ -446,26 +407,6 @@ public struct CameraView: View {
       configuration.label
         .scaleEffect(configuration.isPressed ? 0.85 : 1.0)
         .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
-    }
-  }
-  
-  /// Creates a close/dismiss button in the top-left corner
-  private func closeButton() -> some View {
-    VStack(alignment: .trailing) {
-      HStack {
-        Button {
-          dismiss()
-        } label: {
-          Image(systemName: "xmark")
-        }
-        .frame(width: 44, height: 44)
-        .foregroundColor(.white)
-        .font(.system(size: 24))
-        .shadow(color: .black.opacity(0.5), radius: 3)
-        .padding(8)
-        Spacer()
-      }
-      Spacer()
     }
   }
   
