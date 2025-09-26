@@ -501,11 +501,12 @@ private extension View {
 // MARK: - Previews
 
 #Preview("Round") {
-  CameraView(title: "Take a selfie", forSelfie: true) { _ in }
+    CameraView(title: "Take a selfie", forSelfie: true) { _ in }
+        .environmentObject(DeviceOrientationManager.shared)
 }
 
 #Preview("Square") {
-  CameraView(title: "Take a selfie", forSelfie: true) { _ in }
+    CameraView(title: "Take a selfie", forSelfie: true) { _ in }
+        .environmentObject(DeviceOrientationManager.shared)
 }
-
 
